@@ -14,4 +14,5 @@ if (length(new.packages)) {
 
 rm(new.packages)
 
+library(shiny)
 library(tidyr)
