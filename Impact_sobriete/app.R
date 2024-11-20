@@ -1,7 +1,7 @@
 # INSTALLATION DEPENDANCES ----------------------------------------------------
 
 source('../dependencies.R')
-source('fonctions.R')
+source('../fonctions.R')
 
 # charger les paquets
 lapply(required_packages, require, character.only = TRUE)
