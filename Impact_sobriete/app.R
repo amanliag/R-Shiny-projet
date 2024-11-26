@@ -1,13 +1,12 @@
 # INSTALLATION DEPENDANCES ----------------------------------------------------
 
-source('dependencies.R')
-source('fonctions.R')
+source('../dependencies.R')
+source('../fonctions.R')
 
 # charger les paquets
 lapply(required_packages, require, character.only = TRUE)
 
 # ui ----------------------------------------------------
-
 ui <- fluidPage(
   ######## DASHBOARD ########
   dashboardPage(
@@ -25,9 +24,9 @@ ui <- fluidPage(
         tabItem(tabName = "simulateur",
                 h2("Contenu du simulateur"),
                 
-                # Disposition des filtres à gauche et du graphique à droite
+                # Disposition des filtres (côte à côte) et du graphique en dessous
                 fluidRow(
-                  column(4,  # 4/12 de l'espace pour les filtres (1/3 de la page)
+                  column(6,
                          wellPanel(
                            style = "background-color: #ffcdba; border: 2px solid #150a0a;",
                            h3("Famille 1"),
@@ -35,7 +34,9 @@ ui <- fluidPage(
                            numericInput("prime_f1", "Montant de la prime/remboursement :", value=20),
                            numericInput("heure_garde_f1", "Nombre d’heures de garde par jour de la semaine :", value=35),
                            numericInput("sem_vacances_f1", "Nombre de semaines de vacances :", value=25)
-                         ),
+                         )
+                  ),
+                  column(6,
                          wellPanel(
                            style = "background-color: #ffcdba; border: 2px solid #150a0a;",
                            h3("Famille 2"),
@@ -44,8 +45,10 @@ ui <- fluidPage(
                            numericInput("heure_garde_f2", "Nombre d’heures de garde par jour de la semaine :", value=35),
                            numericInput("sem_vacances_f2", "Nombre de semaines de vacances :", value=25)
                          )
-                  ),
-                  column(8,  
+                  )
+                ),
+                fluidRow(
+                  column(12,  
                          plotOutput("barplot_salaire")
                   )
                 )
@@ -60,6 +63,7 @@ ui <- fluidPage(
     )
   )
 )
+
 
 server <- function(input, output) {
   
