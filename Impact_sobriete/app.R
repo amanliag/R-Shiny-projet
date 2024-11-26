@@ -1,12 +1,11 @@
-# INSTALLATION DEPENDANCES ----------------------------------------------------
-
+# Charger les dépendances
 source('../dependencies.R')
 source('../fonctions.R')
 
-# charger les paquets
+# Charger les paquets
 lapply(required_packages, require, character.only = TRUE)
 
-# ui ----------------------------------------------------
+# UI
 ui <- fluidPage(
   ######## DASHBOARD ########
   dashboardPage(
@@ -20,36 +19,102 @@ ui <- fluidPage(
     
     dashboardBody(
       tabItems(
-        # Onglet Simulateur
+        ######## ONGLET INFORMATIONS POUR SIMULATEUR ########
+        
         tabItem(tabName = "simulateur",
-                h2("Contenu du simulateur"),
+                h2("Informations nécessaires à la simulation"),
                 
-                # Disposition des filtres (côte à côte) et du graphique en dessous
                 fluidRow(
                   column(6,
                          wellPanel(
                            style = "background-color: #ffcdba; border: 2px solid #150a0a;",
                            h3("Famille 1"),
-                           sliderInput("salaire_f1", "Salaire (net) :", 0, 300, 15, step = 1),
-                           numericInput("prime_f1", "Montant de la prime/remboursement :", value=20),
-                           numericInput("heure_garde_f1", "Nombre d’heures de garde par jour de la semaine :", value=35),
-                           numericInput("sem_vacances_f1", "Nombre de semaines de vacances :", value=25)
+                           
+                           # Salaire brut horaire
+                           wellPanel(
+                             style = "background-color: #fff; border: 1px solid #333;",
+                             numericInput("salaire_brut_f1", "Salaire brut horaire (€) :", value = 12.26, min = 12.26)
+                           ),
+                           # Heures par jour de la semaine
+                           wellPanel(
+                             style = "background-color: #fff; border: 1px solid #333;",
+                             h4("Heures travaillées par jour :"),
+                             lapply(c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"), function(jour) {
+                               tagList(
+                                 h5(jour),
+                                 fluidRow(
+                                   column(6, timeInput(paste0("debut_matin_", jour), "Début matin :", value = strptime("08:00", format = "%H:%M"))),
+                                   column(6, timeInput(paste0("fin_matin_", jour), "Fin matin :", value = strptime("12:00", format = "%H:%M")))
+                                 ),
+                                 fluidRow(
+                                   column(6, timeInput(paste0("debut_aprem_", jour), "Début après-midi :", value = strptime("14:00", format = "%H:%M"))),
+                                   column(6, timeInput(paste0("fin_aprem_", jour), "Fin après-midi :", value = strptime("18:00", format = "%H:%M")))
+                                 ),
+                                 checkboxGroupInput(paste0("repas_", jour), "Repas pris en compte :", 
+                                                    choices = c("Petit-déjeuner", "Midi", "Goûter", "Soir"))
+                               )
+                             })
+                           ),
+                           
+                           # Dates des jours non travaillés et vacances
+                           wellPanel(
+                             style = "background-color: #fff; border: 1px solid #333;",
+                             h4("Dates non travaillées :"),
+                             airDatepickerInput("jours_non_travailles_f1", 
+                                                "Jours non travaillés :", 
+                                                multiple = TRUE, value = Sys.Date()), 
+                             
+                             h4("Périodes de vacances :"),
+                             actionButton("ajout_vacances", "Ajouter une période de vacances"),
+                             uiOutput("vacances_f1") 
+                           )
                          )
                   ),
                   column(6,
                          wellPanel(
                            style = "background-color: #ffcdba; border: 2px solid #150a0a;",
                            h3("Famille 2"),
-                           numericInput("salaire_f2", "Salaire (net) :", value=2000),
-                           numericInput("prime_f2", "Montant de la prime/remboursement :", value=20),
-                           numericInput("heure_garde_f2", "Nombre d’heures de garde par jour de la semaine :", value=35),
-                           numericInput("sem_vacances_f2", "Nombre de semaines de vacances :", value=25)
+                           
+                           # Salaire brut horaire
+                           wellPanel(
+                             style = "background-color: #fff; border: 1px solid #333;",
+                             numericInput("salaire_brut_f2", "Salaire brut horaire (€) :", value = 12.26, min = 12.26)
+                           ),
+                           # Heures par jour de la semaine
+                           wellPanel(
+                             style = "background-color: #fff; border: 1px solid #333;",
+                             h4("Heures travaillées par jour :"),
+                             lapply(c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"), function(jour) {
+                               tagList(
+                                 h5(jour),
+                                 fluidRow(
+                                   column(6, timeInput(paste0("debut_matin_", jour, "_f2"), "Début matin :", value = strptime("08:00", format = "%H:%M"))),
+                                   column(6, timeInput(paste0("fin_matin_", jour, "_f2"), "Fin matin :", value = strptime("12:00", format = "%H:%M")))
+                                 ),
+                                 fluidRow(
+                                   column(6, timeInput(paste0("debut_aprem_", jour, "_f2"), "Début après-midi :", value = strptime("14:00", format = "%H:%M"))),
+                                   column(6, timeInput(paste0("fin_aprem_", jour, "_f2"), "Fin après-midi :", value = strptime("18:00", format = "%H:%M")))
+                                 ),
+                                 checkboxGroupInput(paste0("repas_", jour, "_f2"), "Repas pris en compte :", 
+                                                    choices = c("Petit-déjeuner", "Midi", "Goûter", "Soir"))
+                               )
+                             })
+                           ),
+                           
+                           # Dates des jours non travaillés et vacances
+                           wellPanel(
+                             style = "background-color: #fff; border: 1px solid #333;",
+                             h4("Dates non travaillées :"),
+                             airDatepickerInput("jours_non_travailles_f2", 
+                                                "Jours non travaillés :", 
+                                                multiple = TRUE, 
+                                                value = Sys.Date()), 
+                             
+                             h4("Périodes de vacances :"),
+                             actionButton("ajout_vacances_f2", "Ajouter une période de vacances"),
+                             uiOutput("vacances_f2") 
+                           )
                          )
-                  )
-                ),
-                fluidRow(
-                  column(12,  
-                         plotOutput("barplot_salaire")
                   )
                 )
         ),
@@ -57,47 +122,43 @@ ui <- fluidPage(
         # Onglet Etudes de cas
         tabItem(tabName = "etude_cas",
                 h2("Contenu des études de cas"),
-                selectInput("test", "Test :", choices=NULL)
+                selectInput("test", "Test :", choices = NULL)
         )
       )
     )
   )
 )
 
-
-server <- function(input, output) {
+### SERVER
+server <- function(input, output, session) {
   
-  # Calcul du salaire brut et affichage
-  output$salaire_brut <- renderText({
-    sal_brut <- calcul_brut(input$salaire_f1)
-    emp_cal <- calcul_emp(input$salaire_f1)
-    
-    # Affichage du résultat dans l'UI
-    paste("Salaire brut estimé : ", sal_brut, "€\n",
-          "L'employeur versera : ", emp_cal, "€")
+#### Période vacances
+  compteurs_vacances_f1 <- reactiveVal(0)
+  observeEvent(input$ajout_vacances, {
+    count <- compteurs_vacances_f1() + 1
+    vacations_counter_f1(count)
+    insertUI(
+      selector = "#ajout_vacances",
+      
+      where = "afterEnd",
+      ui = dateRangeInput(paste0("vacation_f1_", count),
+                          label = paste("Période de vacances", count),
+                          start = Sys.Date(), end = Sys.Date() + 7)
+    )
   })
   
-  # Générer le diagramme en barres avec ggplot2
-  output$barplot_salaire <- renderPlot({
-    sal_brut <- calcul_brut(input$salaire_f1)
-    
-    # Créer un barplot avec salaire brut et net
-    bar_data <- c(input$salaire_f1, sal_brut)
-    bar_names <- c("Salaire net", "Salaire Brut")
-    
-    salaire_data <- data.frame(
-      type = bar_names,
-      montant = bar_data
+  compteur_vacances_f2 <- reactiveVal(0)
+  observeEvent(input$ajout_vacances_f2, {
+    count <- compteur_vacances_f2() + 1
+    vacations_counter_f2(count)
+    insertUI(selector = "#ajout_vacances_f2",
+      where = "afterEnd",
+      ui = dateRangeInput(paste0("vacation_f2_", count),
+                          label = paste("Période de vacances", count),
+                          start = Sys.Date(), end = Sys.Date() + 7)
     )
-    
-
-    ggplot(salaire_data, aes(x = type, y = montant, fill = type)) +
-      geom_bar(stat = "identity", show.legend = FALSE) +
-      labs(title = "Comparaison Salaire Net / Salaire Brut", y = "Montant (€)", x = "") +
-      theme_minimal() +
-      scale_fill_manual(values = c("blue", "red"))  
   })
 }
 
-# Run the application 
+# Lancer l'application
 shinyApp(ui = ui, server = server)
