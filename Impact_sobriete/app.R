@@ -158,7 +158,20 @@ server <- function(input, output, session) {
                           start = Sys.Date(), end = Sys.Date() + 7)
     )
   })
+  
+#### Vérification heures
+  observe({ 
+  jours <- c("Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi")
+  heures <- list()
+  for (jour in jours){
+      heures[[jour]]<-list(input[[paste0("debut_matin_", jour)]],
+                           input[[paste0("fin_matin_", jour)]],
+                           input[[paste0("debut_aprem_", jour)]],
+                           input[[paste0("fin_aprem_", jour)]])
+  }
+  res <- calcul_total_heure(heures)
+  showNotification("Test", type = "message")
+  })
 }
-
 # Lancer l'application
 shinyApp(ui = ui, server = server)
