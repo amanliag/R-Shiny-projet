@@ -67,6 +67,14 @@ ui <- fluidPage(
                              h4("Périodes de vacances :"),
                              actionButton("ajout_vacances", "Ajouter une période de vacances"),
                              uiOutput("vacances_f1") 
+                           ),
+                           #Prime de panier/remboursement du transport
+                           wellPanel(
+                             style = "background-color: #fff; border: 1px solid #333;",
+                             h4("Prime de panier :"),
+                             numericInput("prime_panier_f1", "Prime de panier (€) :", value = 7.30, min = 7.30),
+                             h4("Remboursement du titre de transport :"),
+                             numericInput("remb_transport_f1", "Remboursement (€) :", value = 0),
                            )
                          )
                   ),
@@ -113,6 +121,14 @@ ui <- fluidPage(
                              h4("Périodes de vacances :"),
                              actionButton("ajout_vacances_f2", "Ajouter une période de vacances"),
                              uiOutput("vacances_f2") 
+                           ),
+                           #Prime de panier/remboursement du transport
+                           wellPanel(
+                             style = "background-color: #fff; border: 1px solid #333;",
+                             h4("Prime de panier :"),
+                             numericInput("prime_panier_f2", "Prime de panier (€) :", value = 7.30),
+                             h4("Remboursement du titre de transport :"),
+                             numericInput("remb_transport_f2", "Remboursement (€) :", value = 0),
                            )
                          )
                   )
