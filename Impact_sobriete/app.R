@@ -159,7 +159,8 @@ server <- function(input, output, session) {
     )
   })
   
-#### Vérification heures
+#### ----- Vérification heures ----- ###
+  
   observe({ 
   jours <- c("Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi")
   heures <- list()
@@ -168,9 +169,15 @@ server <- function(input, output, session) {
                            input[[paste0("fin_matin_", jour)]],
                            input[[paste0("debut_aprem_", jour)]],
                            input[[paste0("fin_aprem_", jour)]])
+
   }
+  
   res <- calcul_total_heure(heures)
-  showNotification("Test", type = "message")
+  if (res >= 2400 & res <= 2880){
+    showNotification(paste("ATTENTION :", conversion_entier_to_heure(res-2400), "seront payés 25% de plus"), type = "warning",duration = 5)
+  }else if (res >2880){
+    showNotification(paste("Vous dépassez le cadre légal (48h) de :", conversion_entier_to_heure(res-2880), "h, veuillez changer votre saisie"), type = "warning",duration = 5)
+  }
   })
 }
 # Lancer l'application
