@@ -10,6 +10,12 @@ calcul_emp <- function(salaire){
   return (ceiling(salaire/(1-0.417)))
 }
 
+# --- Calcul remboursement transport
+
+calcul_remb_transport <-function(frais_transport){
+  return (ceiling(frais_transport*0.5))
+}
+
 # --- Jsp encore
 
 calcul_mensuel <- function(salaire,nb_heures){
