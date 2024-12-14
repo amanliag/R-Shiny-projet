@@ -1,8 +1,55 @@
-# --- Calcul de net à Brut 
+# --- Calcul de brut à net 
 
-calcul_brut <- function(salaire){
-  return (ceiling(salaire/(1-0.23)))
+calcul_net <- function(salaire_brut) {
+  return (ceiling(salaire_brut * (1 - 0.23)))
 }
+
+# --- Salaire brut annualisé 
+calcul_salaire_mensualise_partage <- function(heures_par_semaine_f1, heures_par_semaine_f2, tarif_horaire_f1, tarif_horaire_f2, semaines_travaillees) {
+  salaire_f1 <- (semaines_travaillees * heures_par_semaine_f1 * tarif_horaire_f1) / 12
+  salaire_f2 <- (semaines_travaillees * heures_par_semaine_f2 * tarif_horaire_f2) / 12
+  salaire_total <- salaire_f1 + salaire_f2
+    
+  salaire_f1 <- round(salaire_f1, 2)
+  salaire_f2 <- round(salaire_f2, 2)
+  salaire_total <- round(salaire_total, 2)
+  
+  return(list(
+    salaire_f1 = salaire_f1,
+    salaire_f2 = salaire_f2,
+    salaire_total = salaire_total
+  ))
+}
+
+
+# --- Salaire net annualisé 
+repartition_salaire_net_mensualise <- function(heures_f1, heures_f2, tarif_horaire_brut_f1, tarif_horaire_brut_f2, semaines_travaillees) {
+  tarif_net_f1 <- tarif_horaire_brut_f1 * (1 - 0.23)
+  tarif_net_f2 <- tarif_horaire_brut_f2 * (1 - 0.23)
+  
+  contribution_net_f1 <- (heures_f1 * tarif_net_f1 * semaines_travaillees)/12
+  contribution_net_f2 <- (heures_f2 * tarif_net_f2 * semaines_travaillees)/12
+  
+  total_contribution_net <- contribution_net_f1 + contribution_net_f2
+  
+  part_f1 <- contribution_net_f1 / total_contribution_net
+  part_f2 <- contribution_net_f2 / total_contribution_net
+  
+  contribution_net_f1 <- round(contribution_net_f1, 2)
+  contribution_net_f2 <- round(contribution_net_f2, 2)
+  total_contribution_net <- round(total_contribution_net, 2)
+  part_f1 <- round(part_f1, 2)
+  part_f2 <- round(part_f2, 2)
+  
+  return(list(
+    contribution_net_f1 = contribution_net_f1,
+    contribution_net_f2 = contribution_net_f2,
+    total_contribution_net = total_contribution_net,
+    part_f1 = part_f1,
+    part_f2 = part_f2
+  ))
+}
+
 
 # --- Calcul part employeur
 
