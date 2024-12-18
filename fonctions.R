@@ -63,11 +63,16 @@ calcul_remb_transport <-function(frais_transport){
   return (ceiling(frais_transport*0.5))
 }
 
-# --- Jsp encore
+# --- Charges patronales
 
-calcul_mensuel <- function(salaire,nb_heures){
-  
+charges_patronales <- function(salaire_brut) {
+  if (is.null(salaire_brut) || !is.numeric(salaire_brut)) return(0)  
+  taux_charges_patronales <- 0.4469
+  charges_patronales <- salaire_brut * taux_charges_patronales
+  return(round(charges_patronales, 2))
 }
+
+
 
 # --- Nombre total d'heures ---
 
