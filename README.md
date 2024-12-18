@@ -8,9 +8,9 @@ Pour réaliser cela, nous utilisons des informations conformes à la réglementa
 
 ## Fonctionnalités mises en place
 
-L'interface contient 2 onglets principaux:  Simulateur et Etude de cas. 
+L'interface contient 4 onglets principaux:  Simulateur, Etude de cas, Législation à respecter concernant l'assistante maternelle, Droits et aides de l'employeur. 
 
-### Application - Onglet simulateur
+### Onglet Simulateur
 
 
 Le simulateur est l'endroit où il faut saisir les données des deux familles pour réaliser les calculs de coût. 
@@ -18,9 +18,13 @@ Les inputs actuels sont le salaire brut horaire pour chaque famille, les heures 
 Les sorties actuelles sont les salaires nets et bruts (par heure et mensualisés), les coûts totaux pour les familles dont les salaires, les charges patronales, les indemnités des repas. 
 
 
-### Application - Etude de cas
+### Onglet Etude de cas
 
 L'onglet étude de cas est encore en cours de traitement mais proposera à l'avenir des scénarios prédéfinis pour valider des calculs. 
+
+### Onglet Législation concernant l'assistante maternelle 
+
+### Onglet Droits et aides de l'employeur
 
 ### Prérequis pour l'utilisation de l'application
 
