@@ -1,3 +1,7 @@
+library(shiny)
+library(DT)
+library(shinydashboard)
+
 # Charger les dépendances
 source('../dependencies.R')
 source('../fonctions.R')
@@ -6,121 +10,203 @@ source('../fonctions.R')
 lapply(required_packages, require, character.only = TRUE)
 
 # UI
-ui <- fluidPage(
-  ######## DASHBOARD ########
-  dashboardPage(
-    dashboardHeader(title = "Coût - garde partagé"),
-    dashboardSidebar(
-      sidebarMenu(
-        menuItem("Simulateur", tabName = "simulateur", icon = icon("chart-pie")),
-        menuItem("Etudes de cas", tabName = "etude_cas", icon = icon("user"))
-      )
-    ),
-    
-    dashboardBody(
-      tabItems(
-        ######## ONGLET INFORMATIONS POUR SIMULATEUR ########
-        tabItem(tabName = "simulateur",
-                h2("Informations nécessaires à la simulation"),
-                
-                # Informations pour les deux familles
-                fluidRow(
-                  column(6,
+ui <- dashboardPage(
+  dashboardHeader(title = "Coût - garde partagé"),
+  dashboardSidebar(
+    sidebarMenu(
+      menuItem("Simulateur", tabName = "simulateur", icon = icon("chart-pie")),
+      menuItem("Etudes de cas", tabName = "etude_cas", icon = icon("user")),
+      menuItem("Législation à respecter", tabName = "legislation", icon = icon("book")),
+      menuItem("Droits et aides de l'employeur", tabName = "droits_aides", icon = icon("hand-holding-usd"))
+      
+    )
+  ),
+  dashboardBody(
+    tabItems(
+      ######## ONGLET SIMULATEUR ########
+      tabItem(tabName = "simulateur",
+              h2("Informations nécessaires à la simulation"),
+              fluidRow(
+                column(6,
+                       wellPanel(
+                         style = "background-color: #ffcdba; border: 2px solid #150a0a;",
+                         h3("Famille 1"),
                          wellPanel(
-                           style = "background-color: #ffcdba; border: 2px solid #150a0a;",
-                           h3("Famille 1"),
-                           
-                           # Salaire brut horaire
-                           wellPanel(
-                             style = "background-color: #fff; border: 1px solid #333;",
-                             numericInput("salaire_brut_f1", "Salaire brut horaire (€) :", value = 12.26, min = 12.26)
-                           ),
-                           # Heures et repas par jour
-                           wellPanel(
-                             style = "background-color: #fff; border: 1px solid #333;",
-                             h4("Heures travaillées par jour :"),
-                             lapply(c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"), function(jour) {
-                               tagList(
-                                 h5(jour),
-                                 fluidRow(
-                                   column(6, timeInput(paste0("debut_matin_", jour, "_f1"), "Début matin :", value = strptime("08:00", format = "%H:%M"))),
-                                   column(6, timeInput(paste0("fin_matin_", jour, "_f1"), "Fin matin :", value = strptime("12:00", format = "%H:%M")))
-                                 ),
-                                 fluidRow(
-                                   column(6, timeInput(paste0("debut_aprem_", jour, "_f1"), "Début après-midi :", value = strptime("14:00", format = "%H:%M"))),
-                                   column(6, timeInput(paste0("fin_aprem_", jour, "_f1"), "Fin après-midi :", value = strptime("18:00", format = "%H:%M")))
-                                 ),
-                                 fluidRow(
-                                   column(12,
-                                          checkboxGroupInput(paste0("repas_", jour, "_f1"), "Repas pris en charge :", 
-                                                             choices = c("Petit-déjeuner", "Déjeuner", "Goûter", "Dîner"),
-                                                             selected = NULL)
-                                   )
-                                 )
-                               )
-                             })
-                           )
-                         )
-                  ),
-                  column(6,
+                           style = "background-color: #fff; border: 1px solid #333;",
+                           numericInput("salaire_brut_f1", "Salaire brut horaire (€) :", value = 12.26, min = 12.26)
+                         ),
                          wellPanel(
-                           style = "background-color: #ffcdba; border: 2px solid #150a0a;",
-                           h3("Famille 2"),
-                           
-                           # Salaire brut horaire
-                           wellPanel(
-                             style = "background-color: #fff; border: 1px solid #333;",
-                             numericInput("salaire_brut_f2", "Salaire brut horaire (€) :", value = 12.26, min = 12.26)
-                           ),
-                           # Heures et repas par jour
-                           wellPanel(
-                             style = "background-color: #fff; border: 1px solid #333;",
-                             h4("Heures travaillées par jour :"),
-                             lapply(c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"), function(jour) {
-                               tagList(
-                                 h5(jour),
-                                 fluidRow(
-                                   column(6, timeInput(paste0("debut_matin_", jour, "_f2"), "Début matin :", value = strptime("08:00", format = "%H:%M"))),
-                                   column(6, timeInput(paste0("fin_matin_", jour, "_f2"), "Fin matin :", value = strptime("12:00", format = "%H:%M")))
-                                 ),
-                                 fluidRow(
-                                   column(6, timeInput(paste0("debut_aprem_", jour, "_f2"), "Début après-midi :", value = strptime("14:00", format = "%H:%M"))),
-                                   column(6, timeInput(paste0("fin_aprem_", jour, "_f2"), "Fin après-midi :", value = strptime("18:00", format = "%H:%M")))
-                                 ),
-                                 fluidRow(
-                                   column(12,
-                                          checkboxGroupInput(paste0("repas_", jour, "_f2"), "Repas pris en charge :", 
-                                                             choices = c("Petit-déjeuner", "Déjeuner", "Goûter", "Dîner"),
-                                                             selected = NULL)
-                                   )
-                                 )
+                           style = "background-color: #fff; border: 1px solid #333;",
+                           h4("Heures travaillées par jour :"),
+                           lapply(c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"), function(jour) {
+                             tagList(
+                               h5(jour),
+                               fluidRow(
+                                 column(6, timeInput(paste0("debut_matin_", jour, "_f1"), "Début matin :", value = strptime("08:00", format = "%H:%M"))),
+                                 column(6, timeInput(paste0("fin_matin_", jour, "_f1"), "Fin matin :", value = strptime("12:00", format = "%H:%M")))
+                               ),
+                               fluidRow(
+                                 column(6, timeInput(paste0("debut_aprem_", jour, "_f1"), "Début après-midi :", value = strptime("14:00", format = "%H:%M"))),
+                                 column(6, timeInput(paste0("fin_aprem_", jour, "_f1"), "Fin après-midi :", value = strptime("18:00", format = "%H:%M")))
+                               ),
+                               fluidRow(
+                                 column(12, checkboxGroupInput(paste0("repas_", jour, "_f1"), "Repas pris en charge :", choices = c("Petit-déjeuner", "Déjeuner", "Goûter", "Dîner"), selected = NULL))
                                )
-                             })
-                           )
+                             )
+                           })
                          )
+                       )
+                ),
+                column(6,
+                       wellPanel(
+                         style = "background-color: #ffcdba; border: 2px solid #150a0a;",
+                         h3("Famille 2"),
+                         wellPanel(
+                           style = "background-color: #fff; border: 1px solid #333;",
+                           numericInput("salaire_brut_f2", "Salaire brut horaire (€) :", value = 12.26, min = 12.26)
+                         ),
+                         wellPanel(
+                           style = "background-color: #fff; border: 1px solid #333;",
+                           h4("Heures travaillées par jour :"),
+                           lapply(c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"), function(jour) {
+                             tagList(
+                               h5(jour),
+                               fluidRow(
+                                 column(6, timeInput(paste0("debut_matin_", jour, "_f2"), "Début matin :", value = strptime("08:00", format = "%H:%M"))),
+                                 column(6, timeInput(paste0("fin_matin_", jour, "_f2"), "Fin matin :", value = strptime("12:00", format = "%H:%M")))
+                               ),
+                               fluidRow(
+                                 column(6, timeInput(paste0("debut_aprem_", jour, "_f2"), "Début après-midi :", value = strptime("14:00", format = "%H:%M"))),
+                                 column(6, timeInput(paste0("fin_aprem_", jour, "_f2"), "Fin après-midi :", value = strptime("18:00", format = "%H:%M")))
+                               ),
+                               fluidRow(
+                                 column(12, checkboxGroupInput(paste0("repas_", jour, "_f2"), "Repas pris en charge :", choices = c("Petit-déjeuner", "Déjeuner", "Goûter", "Dîner"), selected = NULL))
+                               )
+                             )
+                           })
+                         )
+                       )
+                )
+              ),
+              fluidRow(
+                column(12,
+                       actionButton("calcul_global", "Calculer pour les deux familles"),
+                       verbatimTextOutput("resultats_combines")
+                )
+              )
+      ),
+      ######## ONGLET LÉGISLATION ########
+      tabItem(tabName = "legislation",
+              h3("Législation à respecter concernant l'assistante maternelle", align = "center"),
+              fluidRow(
+                box(
+                  title = "Charges sociales et salaire minimum", 
+                  status = "primary", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  DTOutput("table_charges")
+                ),
+                box(
+                  title = "Durée et organisation du travail", 
+                  status = "info", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  DTOutput("table_duree")
+                ),
+                box(
+                  title = "Repos et vacances", 
+                  status = "success", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  tags$ul(
+                    tags$li("Repos hebdomadaire : Minimum 24 heures consécutives"),
+                    tags$li("Coordination des repos : Si plusieurs employeurs, le jour de repos est le même pour tous"),
+                    tags$li("Vacances : Doivent être les mêmes pour toutes les familles employeuses")
                   )
                 ),
-                
-                fluidRow(
-                  column(12,
-                         actionButton("calcul_global", "Calculer pour les deux familles"),
-                         verbatimTextOutput("resultats_combines") 
+                box(
+                  title = "Indemnités", 
+                  status = "warning", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  tags$ul(
+                    tags$li("Indemnités repas : 1.50€ petit-déjeuner et goûter, 4.50€ déjeuner et dîner"),
+                    tags$li("Indemnités transport : À préciser")
+                  )
+                ),
+                box(
+                  title = "Salaire annualisé", 
+                  status = "primary", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  tags$p("Salaire hebdomadaire × Nombre de semaines travaillées ÷ 12")
+                ),
+                box(
+                  title = "Calcul des congés payés", 
+                  status = "info", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  tags$p("Nombre de semaines de travail effectif × 2,5 jours de congés payés ÷ 4 semaines = nombre de jours de congés payés ouvrables acquis par le salarié.")
+                ),
+                box(
+                  title = "Travail de nuit", 
+                  status = "warning", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  tags$p("Les heures de 20h30 à 6h30 seront payées au même tarif que le jour.")
+                ),
+                box(
+                  title = "Précision sur les jours fériés", 
+                  status = "danger", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  tags$ul(
+                    tags$li("Si le jour férié tombe pendant une semaine non travaillée prévue alors le jour n'est pas rémunéré."),
+                    tags$li("Si le jour férié tombe sur une semaine prévue au travail, alors pour qu’il soit rémunéré, l’assistante maternelle doit avoir travaillé habituellement le jour d’accueil qui précède et celui qui suit le jour férié."),
+                    tags$li("Le 1er Mai, le salaire est doublé, pour les autres jours fériés ordinaires, majorés à 10% du salaire de base.")
                   )
                 )
-        ),
-        
-        # Onglet Etudes de cas
-        tabItem(tabName = "etude_cas",
-                h2("Contenu des études de cas"),
-                selectInput("test", "Test :", choices = NULL)
+              )
+      ),
+      ######## ONGLET DROITS ET AIDES DE L'EMPLOYEUR ########
+      tabItem(tabName = "droits_aides",
+              h3("Droits et aides de l'employeur", align = "center"),
+              fluidRow(
+                box(
+                  title = "Crédit d'impôt", 
+                  status = "info", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  tags$ul(
+                    tags$li("Conditions: l'enfant doit avoir moins de 6 ans le 1er janvier de l'année d'imposition et être à la charge de la personne recevant le crédit d'impôt."),
+                    tags$li("Crédit d'impôt égal à 50% des dépenses"),
+                    tags$li("Plafond des dépenses : 3500 € par an (déduire la CMG des dépenses total pour connaître la valeur à déclarer) et par enfant gardé (1750€ en cas de garde alternée)."),
+                    tags$li("Crédit d'impôt différent de déduction d'impôt."),
+                    tags$li(tags$a(href = "https://www.service-public.fr/particuliers/vosdroits/F8.", "Informations en cliquant ici - site du service public"))
+                  )
+                  
+                ),
+                box(
+                  title = "Complément de libre choix du mode de garde (CMG)", 
+                  status = "warning", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  tags$ul(
+                    tags$li("Prise en charge partielle de la rémunération d'une assistante maternelle agréée."),
+                    tags$li("Conditions: rémunération brute ne doit pas dépasser 59,40 € par jour et par enfant gardé, le complément prend en charge jusqu'à 85 % de la rémunération et l'enfant doit avoir moins de 6 ans."),
+                    tags$li(tags$a(href = "https://www.service-public.fr/particuliers/vosdroits/F345", 
+                                   "Simulateur disponible ici - site du service public"))
+                  )
+                )
+                
+              )
         )
       )
     )
   )
-)
 
 
-### SERVER
+# Server
 server <- function(input, output, session) {
   
   #### Calcul des heures totales travaillées par semaine pour une famille donnée ####
@@ -209,16 +295,62 @@ server <- function(input, output, session) {
         "- Indemnités repas : ", round((indemnite_f2*52)/12, 2), "€\n", #à mieux calculer selon le nombre de semaines travaillé etc
         "- Charges patronales :", charges_patronales(salaire_annuel_f2), "€\n",
         "- Coût total par mois :", round(salaire_annuel_f2, 2) + round((indemnite_f2*52)/12, 2) + charges_f2, "€\n\n",
-    
+        
         "Résultats combinés :\n",
         "- Heures totales par semaine : ", round(heures_totales, 2), "h\n",
         "- Salaire annualisé total : ", round(salaire_annuel_total, 2), "€\n",
         "- Indemnités repas totales : ", round(indemnite_f1 + indemnite_f2, 2), "€\n\n"
-
+        
       )
     })
+  })
+  
+  # Charges sociales et salaire minimum
+  output$table_charges <- renderDT({
+    datatable(
+      data.frame(
+        Catégorie = c(
+          "Charges sociales salariales", 
+          "Charges sociales patronales", 
+          "Salaire brut minimum", 
+          "Salaire net minimum"
+        ),
+        Valeur = c(
+          "21,88% du brut", 
+          "44,69% du brut", 
+          "12,26 €/heure", 
+          "9,56 €/heure"
+        )
+      ),
+      options = list(dom = 't', paging = FALSE),
+      rownames = FALSE
+    )
+  })
+  
+  # Durée et organisation du travail
+  output$table_duree <- renderDT({
+    datatable(
+      data.frame(
+        Catégorie = c(
+          "Heures majorées", 
+          "Durée maximale par jour", 
+          "Durée maximale par semaine", 
+          "Durée de travail hebdomadaire normale", 
+          "Temps de repos obligatoire"
+        ),
+        Valeur = c(
+          "+25% à partir de la 40ᵉ heure", 
+          "9 heures", 
+          "48 heures", 
+          "45 heures", 
+          "11 heures après une journée de travail"
+        )
+      ),
+      options = list(dom = 't', paging = FALSE),
+      rownames = FALSE
+    )
   })
 }
 
 # Lancer l'application
-shinyApp(ui = ui, server = server)
+shinyApp(ui, server)
