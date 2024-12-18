@@ -35,7 +35,7 @@ ui <- fluidPage(
                              style = "background-color: #fff; border: 1px solid #333;",
                              numericInput("salaire_brut_f1", "Salaire brut horaire (€) :", value = 12.26, min = 12.26)
                            ),
-                           # Heures par jour de la semaine
+                           # Heures et repas par jour
                            wellPanel(
                              style = "background-color: #fff; border: 1px solid #333;",
                              h4("Heures travaillées par jour :"),
@@ -49,6 +49,13 @@ ui <- fluidPage(
                                  fluidRow(
                                    column(6, timeInput(paste0("debut_aprem_", jour, "_f1"), "Début après-midi :", value = strptime("14:00", format = "%H:%M"))),
                                    column(6, timeInput(paste0("fin_aprem_", jour, "_f1"), "Fin après-midi :", value = strptime("18:00", format = "%H:%M")))
+                                 ),
+                                 fluidRow(
+                                   column(12,
+                                          checkboxGroupInput(paste0("repas_", jour, "_f1"), "Repas pris en charge :", 
+                                                             choices = c("Petit-déjeuner", "Déjeuner", "Goûter", "Dîner"),
+                                                             selected = NULL)
+                                   )
                                  )
                                )
                              })
@@ -65,7 +72,7 @@ ui <- fluidPage(
                              style = "background-color: #fff; border: 1px solid #333;",
                              numericInput("salaire_brut_f2", "Salaire brut horaire (€) :", value = 12.26, min = 12.26)
                            ),
-                           # Heures par jour de la semaine
+                           # Heures et repas par jour
                            wellPanel(
                              style = "background-color: #fff; border: 1px solid #333;",
                              h4("Heures travaillées par jour :"),
@@ -79,6 +86,13 @@ ui <- fluidPage(
                                  fluidRow(
                                    column(6, timeInput(paste0("debut_aprem_", jour, "_f2"), "Début après-midi :", value = strptime("14:00", format = "%H:%M"))),
                                    column(6, timeInput(paste0("fin_aprem_", jour, "_f2"), "Fin après-midi :", value = strptime("18:00", format = "%H:%M")))
+                                 ),
+                                 fluidRow(
+                                   column(12,
+                                          checkboxGroupInput(paste0("repas_", jour, "_f2"), "Repas pris en charge :", 
+                                                             choices = c("Petit-déjeuner", "Déjeuner", "Goûter", "Dîner"),
+                                                             selected = NULL)
+                                   )
                                  )
                                )
                              })
@@ -104,6 +118,7 @@ ui <- fluidPage(
     )
   )
 )
+
 
 ### SERVER
 server <- function(input, output, session) {
@@ -136,16 +151,43 @@ server <- function(input, output, session) {
     return(total_minutes / 60) # Convertir les minutes en heures
   }
   
+  #### Calcul des indemnités repas ####
+  calcul_indemnite_repas <- function(input_suffixe) {
+    jours <- c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche")
+    total_indemnite <- 0
+    
+    for (jour in jours) {
+      repas_selectionnes <- input[[paste0("repas_", jour, input_suffixe)]]
+      
+      if (!is.null(repas_selectionnes)) {
+        total_indemnite <- total_indemnite + 
+          sum(1.5 * (repas_selectionnes %in% c("Petit-déjeuner", "Goûter"))) +
+          sum(4.5 * (repas_selectionnes %in% c("Déjeuner", "Dîner")))
+      }
+    }
+    
+    return(total_indemnite)
+  }
+  
   #### Observer le bouton pour calculer les résultats ####
   observeEvent(input$calcul_global, {
-    heures_f1 <- calcul_heures_semaine("_f1") #Préfixe Famille 1
-    salaire_brut_f1 <- input$salaire_brut_f1
-    salaire_annuel_f1 <- salaire_brut_f1 * heures_f1 * 52
+    salaire_brut_f1 <- as.numeric(input$salaire_brut_f1)
+    salaire_brut_f2 <- as.numeric(input$salaire_brut_f2)
     
-    heures_f2 <- calcul_heures_semaine("_f2") # Préfixe pour Famille 2
-    salaire_brut_f2 <- input$salaire_brut_f2
-    salaire_annuel_f2 <- salaire_brut_f2 * heures_f2 * 52
+    heures_f2 <- calcul_heures_semaine("_f2")
+    heures_f1 <- calcul_heures_semaine("_f1")
     
+    # Famille 1
+    salaire_annuel_f1 <- calcul_salaire_mensualise_partage(heures_f1, heures_f2, salaire_brut_f1, salaire_brut_f2, 52)$salaire_f1
+    charges_f1 <- charges_patronales(salaire_brut_f1)    
+    indemnite_f1 <- calcul_indemnite_repas("_f1")
+    
+    # Famille 2
+    salaire_annuel_f2 <- calcul_salaire_mensualise_partage(heures_f1, heures_f2, salaire_brut_f1, salaire_brut_f2, 52)$salaire_f2
+    charges_f2 <- charges_patronales(salaire_brut_f2)    
+    indemnite_f2 <- calcul_indemnite_repas("_f2")
+    
+    # Total global
     heures_totales <- heures_f1 + heures_f2
     salaire_annuel_total <- salaire_annuel_f1 + salaire_annuel_f2
     
@@ -153,27 +195,26 @@ server <- function(input, output, session) {
       paste(
         "Résultats pour la Famille 1 :\n",
         "- Salaire brut horaire : ", salaire_brut_f1, "€\n",
-        "- Salaire net horaire :", calcul_net(salaire_brut_f1), "€\n",
         "- Heures par semaine : ", round(heures_f1, 2), "h\n",
-        "- Salaire annualisé : ", round(salaire_annuel_f1, 2), "€\n\n",
+        "- Salaire annualisé brut : ", round(salaire_annuel_f1, 2), "€\n",
+        "- Indemnités repas: ", round((indemnite_f1*52)/12,2), "€\n", #à mieux calculer selon le nombre de semaines travaillé etc
+        "- Charges patronales par mois:", charges_patronales(salaire_annuel_f1), "€\n",
+        "- Coût total par mois :", round(salaire_annuel_f1, 2) + round((indemnite_f1*52)/12, 2) + charges_f1, "€\n\n",
+        
         
         "Résultats pour la Famille 2 :\n",
         "- Salaire brut horaire : ", salaire_brut_f2, "€\n",
-        "- Salaire net horaire :", calcul_net(salaire_brut_f2), "€\n",
         "- Heures par semaine : ", round(heures_f2, 2), "h\n",
-        "- Salaire annualisé : ", round(salaire_annuel_f2, 2), "€\n\n",
-        
+        "- Salaire annualisé : ", round(salaire_annuel_f2, 2), "€\n",
+        "- Indemnités repas : ", round((indemnite_f2*52)/12, 2), "€\n", #à mieux calculer selon le nombre de semaines travaillé etc
+        "- Charges patronales :", charges_patronales(salaire_annuel_f2), "€\n",
+        "- Coût total par mois :", round(salaire_annuel_f2, 2) + round((indemnite_f2*52)/12, 2) + charges_f2, "€\n\n",
+    
         "Résultats combinés :\n",
-        "- Heures totales par semaine : ", round(heures_totales, 2), "h\n", #A CORRIGER SELON LES PLAGES HORAIRES DES FAMILLES
-        "- Salaire annualisé total brut pour la famille 1: ", calcul_salaire_mensualise_partage(round(heures_f1, 2), round(heures_f2, 2), salaire_brut_f1, salaire_brut_f2, 52)[1],"€\n",
-        "- Salaire annualisé total brut pour la famille 2: ", calcul_salaire_mensualise_partage(round(heures_f1, 2), round(heures_f2, 2), salaire_brut_f1, salaire_brut_f2, 52)[2],"€\n",
-        "- Salaire annualisé total brut pour les deux familles: ", calcul_salaire_mensualise_partage(round(heures_f1, 2), round(heures_f2, 2), salaire_brut_f1, salaire_brut_f2, 52)[3],"€\n\n",
-        
-        "- Salaire annualisé total net pour la famille 1: ", repartition_salaire_net_mensualise(round(heures_f1, 2), round(heures_f2, 2), salaire_brut_f1, salaire_brut_f2, 52)[1],"€\n",
-        "- Salaire annualisé total net pour la famille 2: ", repartition_salaire_net_mensualise(round(heures_f1, 2), round(heures_f2, 2), salaire_brut_f1, salaire_brut_f2, 52)[2],"€\n",
-        "- Salaire annualisé total net pour les deux familles: ", repartition_salaire_net_mensualise(round(heures_f1, 2), round(heures_f2, 2), salaire_brut_f1, salaire_brut_f2, 52)[3],"€\n",
-        "- Part en pourcentage de la famille 1: ", repartition_salaire_net_mensualise(round(heures_f1, 2), round(heures_f2, 2), salaire_brut_f1, salaire_brut_f2, 52)[4],"%\n",
-        "- Part en pourcentage de la famille 2: ", repartition_salaire_net_mensualise(round(heures_f1, 2), round(heures_f2, 2), salaire_brut_f1, salaire_brut_f2, 52)[5],"%\n\n"
+        "- Heures totales par semaine : ", round(heures_totales, 2), "h\n",
+        "- Salaire annualisé total : ", round(salaire_annuel_total, 2), "€\n",
+        "- Indemnités repas totales : ", round(indemnite_f1 + indemnite_f2, 2), "€\n\n"
+
       )
     })
   })
