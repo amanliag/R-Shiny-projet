@@ -93,6 +93,20 @@ ui <- dashboardPage(
                        actionButton("calcul_global", "Calculer pour les deux familles"),
                        verbatimTextOutput("resultats_combines")
                 )
+              ),
+              fluidRow(
+                column(12,
+                       actionButton("calcul_global", "Graphique pour les deux familles"),
+                       verbatimTextOutput("resultats_combines"),
+                       plotOutput("plot_repartition_heures")
+                )
+              ),
+              fluidRow(
+                column(12,
+                       actionButton("calcul_global", "Graphique pour les deux familles"),
+                       verbatimTextOutput("resultats_combines"),
+                       plotOutput("plot_revenu_famille")
+                )
               )
       ),
       ######## ONGLET LÉGISLATION ########
@@ -165,6 +179,13 @@ ui <- dashboardPage(
                     tags$li("Si le jour férié tombe sur une semaine prévue au travail, alors pour qu’il soit rémunéré, l’assistante maternelle doit avoir travaillé habituellement le jour d’accueil qui précède et celui qui suit le jour férié."),
                     tags$li("Le 1er Mai, le salaire est doublé, pour les autres jours fériés ordinaires, majorés à 10% du salaire de base.")
                   )
+                ),
+                box(
+                  title = "Répartition des charges sociales", 
+                  status = "primary", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  plotOutput("plot_charges")
                 )
               )
       ),
@@ -304,6 +325,52 @@ server <- function(input, output, session) {
       )
     })
   })
+  
+  # graphiques
+  
+  output$plot_repartition_heures <- renderPlot({
+    # Données pour le graphique
+    heures_f1 <- calcul_heures_semaine("_f1")
+    heures_f2 <- calcul_heures_semaine("_f2")
+    data <- data.frame(
+      Famille = c("Famille 1", "Famille 2"),
+      Heures = c(heures_f1, heures_f2)
+    )
+    
+    ggplot(data, aes(x = Famille, y = Heures, fill = Famille)) +
+      geom_bar(stat = "identity", show.legend = FALSE) +
+      labs(title = "Répartition des heures travaillées", y = "Heures par semaine", x = "Famille") +
+      theme_minimal()
+  })
+  
+  output$plot_revenu_famille <- renderPlot({
+    revenu_f1<-calcul_salaire_mensualise_partage(heures_par_semaine_f1,0,tarif_horaire_f1,0)
+    revenu_f2<-calcul_salaire_mensualise_partage(0,heures_par_semaine_f2,0,tarif_horaire_f2)
+    data <- data.frame(
+      Famille = c("Famille 1", "Famille 2"),
+      Heures = c(revenu_f1, revenu_f2)
+    )
+    
+    ggplot(data, aes(x = Famille, y = Revenus, fill = Famille)) +
+      geom_bar(stat = "identity", show.legend = FALSE) +
+      labs(title = "", y = "", x = "Famille") +
+      theme_minimal()
+  })
+  
+  output$plot_charges <- renderPlot({
+    data <- data.frame(
+      Type = c("Salariales", "Patronales"),
+      Pourcentage = c(21.88, 44.69)
+    )
+    
+    ggplot(data, aes(x = "", y = Pourcentage, fill = Type)) +
+      geom_bar(width = 1, stat = "identity") +
+      coord_polar("y", start = 0) +
+      labs(title = "Répartition des charges sociales", x = NULL, y = NULL) +
+      theme_void() +
+      theme(legend.title = element_blank())
+  })
+  
   
   # Charges sociales et salaire minimum
   output$table_charges <- renderDT({
