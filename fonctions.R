@@ -5,7 +5,7 @@ calcul_net <- function(salaire_brut) {
 }
 
 # --- Salaire brut annualisé 
-calcul_salaire_mensualise_partage <- function(heures_par_semaine_f1, heures_par_semaine_f2, tarif_horaire_f1, tarif_horaire_f2, semaines_travaillees) {
+calcul_salaire_mensualise_partage <- function(heures_par_semaine_f1, heures_par_semaine_f2, tarif_horaire_f1, tarif_horaire_f2, semaines_travaillees = 52) {
   salaire_f1 <- (semaines_travaillees * heures_par_semaine_f1 * tarif_horaire_f1) / 12
   salaire_f2 <- (semaines_travaillees * heures_par_semaine_f2 * tarif_horaire_f2) / 12
   salaire_total <- salaire_f1 + salaire_f2
@@ -23,7 +23,7 @@ calcul_salaire_mensualise_partage <- function(heures_par_semaine_f1, heures_par_
 
 
 # --- Salaire net annualisé 
-repartition_salaire_net_mensualise <- function(heures_f1, heures_f2, tarif_horaire_brut_f1, tarif_horaire_brut_f2, semaines_travaillees) {
+repartition_salaire_net_mensualise <- function(heures_f1, heures_f2, tarif_horaire_brut_f1, tarif_horaire_brut_f2, semaines_travaillees = 52) {
   tarif_net_f1 <- tarif_horaire_brut_f1 * (1 - 0.23)
   tarif_net_f2 <- tarif_horaire_brut_f2 * (1 - 0.23)
   
