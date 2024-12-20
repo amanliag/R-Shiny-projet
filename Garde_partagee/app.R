@@ -18,7 +18,6 @@ ui <- dashboardPage(
       menuItem("Etudes de cas", tabName = "etude_cas", icon = icon("user")),
       menuItem("Législation à respecter", tabName = "legislation", icon = icon("book")),
       menuItem("Droits et aides de l'employeur", tabName = "droits_aides", icon = icon("hand-holding-usd"))
-      
     )
   ),
   dashboardBody(
@@ -94,18 +93,27 @@ ui <- dashboardPage(
                        verbatimTextOutput("resultats_combines")
                 )
               ),
-              fluidRow(
-                column(12,
-                       actionButton("calcul_global", "Graphique pour les deux familles"),
-                       verbatimTextOutput("resultats_combines"),
-                       plotOutput("plot_repartition_heures")
-                )
-              ),
-              fluidRow(
-                column(12,
-                       actionButton("calcul_global", "Graphique pour les deux familles"),
-                       verbatimTextOutput("resultats_combines"),
-                       plotOutput("plot_revenu_famille")
+              conditionalPanel(
+                condition = "output.resultats_combines != null",
+                fluidRow(
+                  column(6,
+                         box(
+                           title = "Répartition des heures travaillées",
+                           status = "primary",
+                           solidHeader = TRUE,
+                           collapsible = TRUE,
+                           plotlyOutput("plot_repartition_heures")
+                         )
+                  ),
+                  column(6,
+                         box(
+                           title = "Revenus par famille",
+                           status = "success",
+                           solidHeader = TRUE,
+                           collapsible = TRUE,
+                           plotlyOutput("plot_revenu_famille")
+                         )
+                  )
                 )
               )
       ),
@@ -126,108 +134,20 @@ ui <- dashboardPage(
                   solidHeader = TRUE, 
                   collapsible = TRUE,
                   DTOutput("table_duree")
-                ),
-                box(
-                  title = "Repos et vacances", 
-                  status = "success", 
-                  solidHeader = TRUE, 
-                  collapsible = TRUE,
-                  tags$ul(
-                    tags$li("Repos hebdomadaire : Minimum 24 heures consécutives"),
-                    tags$li("Coordination des repos : Si plusieurs employeurs, le jour de repos est le même pour tous"),
-                    tags$li("Vacances : Doivent être les mêmes pour toutes les familles employeuses")
-                  )
-                ),
-                box(
-                  title = "Indemnités", 
-                  status = "warning", 
-                  solidHeader = TRUE, 
-                  collapsible = TRUE,
-                  tags$ul(
-                    tags$li("Indemnités repas : 1.50€ petit-déjeuner et goûter, 4.50€ déjeuner et dîner"),
-                    tags$li("Indemnités transport : À préciser")
-                  )
-                ),
-                box(
-                  title = "Salaire annualisé", 
-                  status = "primary", 
-                  solidHeader = TRUE, 
-                  collapsible = TRUE,
-                  tags$p("Salaire hebdomadaire × Nombre de semaines travaillées ÷ 12")
-                ),
-                box(
-                  title = "Calcul des congés payés", 
-                  status = "info", 
-                  solidHeader = TRUE, 
-                  collapsible = TRUE,
-                  tags$p("Nombre de semaines de travail effectif × 2,5 jours de congés payés ÷ 4 semaines = nombre de jours de congés payés ouvrables acquis par le salarié.")
-                ),
-                box(
-                  title = "Travail de nuit", 
-                  status = "warning", 
-                  solidHeader = TRUE, 
-                  collapsible = TRUE,
-                  tags$p("Les heures de 20h30 à 6h30 seront payées au même tarif que le jour.")
-                ),
-                box(
-                  title = "Précision sur les jours fériés", 
-                  status = "danger", 
-                  solidHeader = TRUE, 
-                  collapsible = TRUE,
-                  tags$ul(
-                    tags$li("Si le jour férié tombe pendant une semaine non travaillée prévue alors le jour n'est pas rémunéré."),
-                    tags$li("Si le jour férié tombe sur une semaine prévue au travail, alors pour qu’il soit rémunéré, l’assistante maternelle doit avoir travaillé habituellement le jour d’accueil qui précède et celui qui suit le jour férié."),
-                    tags$li("Le 1er Mai, le salaire est doublé, pour les autres jours fériés ordinaires, majorés à 10% du salaire de base.")
-                  )
-                ),
-                box(
-                  title = "Répartition des charges sociales", 
-                  status = "primary", 
-                  solidHeader = TRUE, 
-                  collapsible = TRUE,
-                  plotOutput("plot_charges")
                 )
               )
-      ),
-      ######## ONGLET DROITS ET AIDES DE L'EMPLOYEUR ########
-      tabItem(tabName = "droits_aides",
-              h3("Droits et aides de l'employeur", align = "center"),
-              fluidRow(
-                box(
-                  title = "Crédit d'impôt", 
-                  status = "info", 
-                  solidHeader = TRUE, 
-                  collapsible = TRUE,
-                  tags$ul(
-                    tags$li("Conditions: l'enfant doit avoir moins de 6 ans le 1er janvier de l'année d'imposition et être à la charge de la personne recevant le crédit d'impôt."),
-                    tags$li("Crédit d'impôt égal à 50% des dépenses"),
-                    tags$li("Plafond des dépenses : 3500 € par an (déduire la CMG des dépenses total pour connaître la valeur à déclarer) et par enfant gardé (1750€ en cas de garde alternée)."),
-                    tags$li("Crédit d'impôt différent de déduction d'impôt."),
-                    tags$li(tags$a(href = "https://www.service-public.fr/particuliers/vosdroits/F8.", "Informations en cliquant ici - site du service public"))
-                  )
-                  
-                ),
-                box(
-                  title = "Complément de libre choix du mode de garde (CMG)", 
-                  status = "warning", 
-                  solidHeader = TRUE, 
-                  collapsible = TRUE,
-                  tags$ul(
-                    tags$li("Prise en charge partielle de la rémunération d'une assistante maternelle agréée."),
-                    tags$li("Conditions: rémunération brute ne doit pas dépasser 59,40 € par jour et par enfant gardé, le complément prend en charge jusqu'à 85 % de la rémunération et l'enfant doit avoir moins de 6 ans."),
-                    tags$li(tags$a(href = "https://www.service-public.fr/particuliers/vosdroits/F345", 
-                                   "Simulateur disponible ici - site du service public"))
-                  )
-                )
-                
-              )
-        )
       )
     )
   )
+)
+                
+                
+                
+                
+                
+               
+         
 
-
-# Server
 server <- function(input, output, session) {
   
   #### Calcul des heures totales travaillées par semaine pour une famille donnée ####
@@ -304,16 +224,15 @@ server <- function(input, output, session) {
         "- Salaire brut horaire : ", salaire_brut_f1, "€\n",
         "- Heures par semaine : ", round(heures_f1, 2), "h\n",
         "- Salaire annualisé brut : ", round(salaire_annuel_f1, 2), "€\n",
-        "- Indemnités repas: ", round((indemnite_f1*52)/12,2), "€\n", #à mieux calculer selon le nombre de semaines travaillé etc
+        "- Indemnités repas: ", round((indemnite_f1*52)/12,2), "€\n",
         "- Charges patronales par mois:", charges_patronales(salaire_annuel_f1), "€\n",
         "- Coût total par mois :", round(salaire_annuel_f1, 2) + round((indemnite_f1*52)/12, 2) + charges_f1, "€\n\n",
-        
         
         "Résultats pour la Famille 2 :\n",
         "- Salaire brut horaire : ", salaire_brut_f2, "€\n",
         "- Heures par semaine : ", round(heures_f2, 2), "h\n",
         "- Salaire annualisé : ", round(salaire_annuel_f2, 2), "€\n",
-        "- Indemnités repas : ", round((indemnite_f2*52)/12, 2), "€\n", #à mieux calculer selon le nombre de semaines travaillé etc
+        "- Indemnités repas : ", round((indemnite_f2*52)/12, 2), "€\n",
         "- Charges patronales :", charges_patronales(salaire_annuel_f2), "€\n",
         "- Coût total par mois :", round(salaire_annuel_f2, 2) + round((indemnite_f2*52)/12, 2) + charges_f2, "€\n\n",
         
@@ -321,15 +240,15 @@ server <- function(input, output, session) {
         "- Heures totales par semaine : ", round(heures_totales, 2), "h\n",
         "- Salaire annualisé total : ", round(salaire_annuel_total, 2), "€\n",
         "- Indemnités repas totales : ", round(indemnite_f1 + indemnite_f2, 2), "€\n\n"
-        
       )
     })
   })
   
-  # graphiques
-  
-  output$plot_repartition_heures <- renderPlot({
-    # Données pour le graphique
+  # Graphiques
+  output$plot_repartition_heures <- renderPlotly({
+    
+    req(input$calcul_global)
+    
     heures_f1 <- calcul_heures_semaine("_f1")
     heures_f2 <- calcul_heures_semaine("_f2")
     data <- data.frame(
@@ -337,40 +256,38 @@ server <- function(input, output, session) {
       Heures = c(heures_f1, heures_f2)
     )
     
-    ggplot(data, aes(x = Famille, y = Heures, fill = Famille)) +
+    p <- ggplot(data, aes(x = Famille, y = Heures, fill = Famille)) +
       geom_bar(stat = "identity", show.legend = FALSE) +
       labs(title = "Répartition des heures travaillées", y = "Heures par semaine", x = "Famille") +
       theme_minimal()
+    
+    ggplotly(p)
   })
   
-  output$plot_revenu_famille <- renderPlot({
-    revenu_f1<-calcul_salaire_mensualise_partage(heures_par_semaine_f1,0,tarif_horaire_f1,0)
-    revenu_f2<-calcul_salaire_mensualise_partage(0,heures_par_semaine_f2,0,tarif_horaire_f2)
+  output$plot_revenu_famille <- renderPlotly({
+    
+    req(input$calcul_global)
+    
+    heures_f1 <- calcul_heures_semaine("_f1")
+    heures_f2 <- calcul_heures_semaine("_f2")
+    salaire_brut_f1 <- as.numeric(input$salaire_brut_f1)
+    salaire_brut_f2 <- as.numeric(input$salaire_brut_f2)
+    
+    revenu_f1 <- calcul_salaire_mensualise_partage(heures_f1, 0, salaire_brut_f1, 52)$salaire_f1
+    revenu_f2 <- calcul_salaire_mensualise_partage(0, heures_f2, salaire_brut_f2, 52)$salaire_f2
+    
     data <- data.frame(
       Famille = c("Famille 1", "Famille 2"),
-      Heures = c(revenu_f1, revenu_f2)
+      Revenus = c(revenu_f1, revenu_f2)
     )
     
-    ggplot(data, aes(x = Famille, y = Revenus, fill = Famille)) +
+    p <- ggplot(data, aes(x = Famille, y = Revenus, fill = Famille)) +
       geom_bar(stat = "identity", show.legend = FALSE) +
-      labs(title = "", y = "", x = "Famille") +
+      labs(title = "Revenus par famille", y = "Revenus (€)", x = "Famille") +
       theme_minimal()
-  })
-  
-  output$plot_charges <- renderPlot({
-    data <- data.frame(
-      Type = c("Salariales", "Patronales"),
-      Pourcentage = c(21.88, 44.69)
-    )
     
-    ggplot(data, aes(x = "", y = Pourcentage, fill = Type)) +
-      geom_bar(width = 1, stat = "identity") +
-      coord_polar("y", start = 0) +
-      labs(title = "Répartition des charges sociales", x = NULL, y = NULL) +
-      theme_void() +
-      theme(legend.title = element_blank())
+    ggplotly(p)
   })
-  
   
   # Charges sociales et salaire minimum
   output$table_charges <- renderDT({
@@ -418,6 +335,7 @@ server <- function(input, output, session) {
     )
   })
 }
+
 
 # Lancer l'application
 shinyApp(ui, server)
