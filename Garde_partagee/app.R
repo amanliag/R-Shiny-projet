@@ -134,7 +134,100 @@ ui <- dashboardPage(
                   solidHeader = TRUE, 
                   collapsible = TRUE,
                   DTOutput("table_duree")
+                ),
+                box(
+                  title = "Repos et vacances", 
+                  status = "success", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  tags$ul(
+                    tags$li("Repos hebdomadaire : Minimum 24 heures consécutives"),
+                    tags$li("Coordination des repos : Si plusieurs employeurs, le jour de repos est le même pour tous"),
+                    tags$li("Vacances : Doivent être les mêmes pour toutes les familles employeuses")
+                  )
+                ),
+                box(
+                  title = "Indemnités", 
+                  status = "warning", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  tags$ul(
+                    tags$li("Indemnités repas : 1.50€ petit-déjeuner et goûter, 4.50€ déjeuner et dîner"),
+                    tags$li("Indemnités transport : À préciser")
+                  )
+                ),
+                box(
+                  title = "Salaire annualisé", 
+                  status = "primary", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  tags$p("Salaire hebdomadaire × Nombre de semaines travaillées ÷ 12")
+                ),
+                box(
+                  title = "Calcul des congés payés", 
+                  status = "info", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  tags$p("Nombre de semaines de travail effectif × 2,5 jours de congés payés ÷ 4 semaines = nombre de jours de congés payés ouvrables acquis par le salarié.")
+                ),
+                box(
+                  title = "Travail de nuit", 
+                  status = "warning", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  tags$p("Les heures de 20h30 à 6h30 seront payées au même tarif que le jour.")
+                ),
+                box(
+                  title = "Précision sur les jours fériés", 
+                  status = "danger", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  tags$ul(
+                    tags$li("Si le jour férié tombe pendant une semaine non travaillée prévue alors le jour n'est pas rémunéré."),
+                    tags$li("Si le jour férié tombe sur une semaine prévue au travail, alors pour qu’il soit rémunéré, l’assistante maternelle doit avoir travaillé habituellement le jour d’accueil qui précède et celui qui suit le jour férié."),
+                    tags$li("Le 1er Mai, le salaire est doublé, pour les autres jours fériés ordinaires, majorés à 10% du salaire de base.")
+                  )
+                ),
+                box(
+                  title = "Répartition des charges sociales", 
+                  status = "primary", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  plotOutput("plot_charges")
                 )
+              )
+      ),
+      ######## ONGLET DROITS ET AIDES DE L'EMPLOYEUR ########
+      tabItem(tabName = "droits_aides",
+              h3("Droits et aides de l'employeur", align = "center"),
+              fluidRow(
+                box(
+                  title = "Crédit d'impôt", 
+                  status = "info", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  tags$ul(
+                    tags$li("Conditions: l'enfant doit avoir moins de 6 ans le 1er janvier de l'année d'imposition et être à la charge de la personne recevant le crédit d'impôt."),
+                    tags$li("Crédit d'impôt égal à 50% des dépenses"),
+                    tags$li("Plafond des dépenses : 3500 € par an (déduire la CMG des dépenses total pour connaître la valeur à déclarer) et par enfant gardé (1750€ en cas de garde alternée)."),
+                    tags$li("Crédit d'impôt différent de déduction d'impôt."),
+                    tags$li(tags$a(href = "https://www.service-public.fr/particuliers/vosdroits/F8.", "Informations en cliquant ici - site du service public"))
+                  )
+                  
+                ),
+                box(
+                  title = "Complément de libre choix du mode de garde (CMG)", 
+                  status = "warning", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  tags$ul(
+                    tags$li("Prise en charge partielle de la rémunération d'une assistante maternelle agréée."),
+                    tags$li("Conditions: rémunération brute ne doit pas dépasser 59,40 € par jour et par enfant gardé, le complément prend en charge jusqu'à 85 % de la rémunération et l'enfant doit avoir moins de 6 ans."),
+                    tags$li(tags$a(href = "https://www.service-public.fr/particuliers/vosdroits/F345", 
+                                   "Simulateur disponible ici - site du service public"))
+                  )
+                )
+                
               )
       )
     )
@@ -287,6 +380,22 @@ server <- function(input, output, session) {
       theme_minimal()
     
     ggplotly(p)
+  })
+  
+  output$plot_charges <- renderPlot({
+    data <- data.frame(
+      Type = c("Salariales", "Patronales"),
+      Pourcentage = c(21.88, 44.69)
+    )
+    
+    ggplot(data, aes(x = "", y = Pourcentage, fill = Type)) +
+      geom_bar(width = 1, stat = "identity") +
+      coord_polar("y", start = 0) +
+      labs(title = "Répartition des charges sociales", x = NULL, y = NULL) +
+      theme_void() +
+      theme(legend.title = element_blank())
+    
+
   })
   
   # Charges sociales et salaire minimum
