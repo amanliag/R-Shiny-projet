@@ -116,3 +116,6 @@ conversion_entier_to_heure <- function(entier){
   heure <- sprintf("%02d:%02d", entier %/% 60, entier %% 60)
   return(heure)
 }
+
+#### ------ VERIFICATION DES 9H max de travail par jour ------ ####
+#A FAIRE
