@@ -1,10 +1,16 @@
 # LIST OF REQUIRED PACKAGES -----------------------------------------------
 
 required_packages <- c(
-  "checkpoint"
+  "shiny", 
+  "shinydashboard", 
+  "tidyr", 
+  "ggplot2", 
+  "shinyTime", 
+  "shinyWidgets", 
+  "plotly", 
+  "shinyFeedback"
 )
 
-# install missing packages
 
 new.packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]
 
@@ -12,13 +18,4 @@ if (length(new.packages)) {
   install.packages(new.packages)
 }
 
-rm(new.packages)
-
-library(shiny)
-library(shinydashboard)
-library(tidyr)
-library(ggplot2)
-library(shinyTime)
-library(shinyWidgets)
-library(plotly)
-
+lapply(required_packages, library, character.only = TRUE)
