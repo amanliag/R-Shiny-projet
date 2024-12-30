@@ -21,6 +21,7 @@ ui <- dashboardPage(
     )
   ),
   dashboardBody(
+    useShinyFeedback(),
     tabItems(
       ######## ONGLET SIMULATEUR ########
       tabItem(tabName = "simulateur",
@@ -41,15 +42,28 @@ ui <- dashboardPage(
                              tagList(
                                h5(jour),
                                fluidRow(
-                                 column(6, timeInput(paste0("debut_matin_", jour, "_f1"), "Début matin :", value = strptime("08:00", format = "%H:%M"))),
-                                 column(6, timeInput(paste0("fin_matin_", jour, "_f1"), "Fin matin :", value = strptime("12:00", format = "%H:%M")))
+                                 column(12, 
+                                        checkboxInput(paste0("jour_travaille_", jour, "_f1"), 
+                                                      label = paste(jour, "travaillé ?"), 
+                                                      value = FALSE)
+                                 )
                                ),
-                               fluidRow(
-                                 column(6, timeInput(paste0("debut_aprem_", jour, "_f1"), "Début après-midi :", value = strptime("14:00", format = "%H:%M"))),
-                                 column(6, timeInput(paste0("fin_aprem_", jour, "_f1"), "Fin après-midi :", value = strptime("18:00", format = "%H:%M")))
-                               ),
-                               fluidRow(
-                                 column(12, checkboxGroupInput(paste0("repas_", jour, "_f1"), "Repas pris en charge :", choices = c("Petit-déjeuner", "Déjeuner", "Goûter", "Dîner"), selected = NULL))
+                               conditionalPanel(
+                                 condition = paste0("input.jour_travaille_", jour, "_f1 == true"),
+                                 fluidRow(
+                                   column(6, timeInput(paste0("debut_matin_", jour, "_f1"), "Début matin :", value = strptime("08:00", format = "%H:%M"))),
+                                   column(6, timeInput(paste0("fin_matin_", jour, "_f1"), "Fin matin :", value = strptime("12:00", format = "%H:%M")))
+                                 ),
+                                 fluidRow(
+                                   column(6, timeInput(paste0("debut_aprem_", jour, "_f1"), "Début après-midi :", value = strptime("14:00", format = "%H:%M"))),
+                                   column(6, timeInput(paste0("fin_aprem_", jour, "_f1"), "Fin après-midi :", value = strptime("18:00", format = "%H:%M")))
+                                 ),
+                                 fluidRow(
+                                   column(12, checkboxGroupInput(paste0("repas_", jour, "_f1"), 
+                                                                 "Repas pris en charge :", 
+                                                                 choices = c("Petit-déjeuner", "Déjeuner", "Goûter", "Dîner"), 
+                                                                 selected = NULL))
+                                 )
                                )
                              )
                            })
@@ -62,24 +76,38 @@ ui <- dashboardPage(
                          h3("Famille 2"),
                          wellPanel(
                            style = "background-color: #fff; border: 1px solid #333;",
-                           numericInput("salaire_brut_f2", "Salaire brut horaire (€) :", value = 12.26, min = 12.26)
+                           numericInput("salaire_brut_f1", "Salaire brut horaire (€) :", value = 12.26, min = 12.26)
                          ),
                          wellPanel(
                            style = "background-color: #fff; border: 1px solid #333;",
                            h4("Heures travaillées par jour :"),
+    
                            lapply(c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"), function(jour) {
                              tagList(
                                h5(jour),
                                fluidRow(
-                                 column(6, timeInput(paste0("debut_matin_", jour, "_f2"), "Début matin :", value = strptime("08:00", format = "%H:%M"))),
-                                 column(6, timeInput(paste0("fin_matin_", jour, "_f2"), "Fin matin :", value = strptime("12:00", format = "%H:%M")))
+                                 column(12, 
+                                        checkboxInput(paste0("jour_travaille_", jour, "_f2"), 
+                                                      label = paste(jour, "travaillé ?"), 
+                                                      value = FALSE)
+                                 )
                                ),
-                               fluidRow(
-                                 column(6, timeInput(paste0("debut_aprem_", jour, "_f2"), "Début après-midi :", value = strptime("14:00", format = "%H:%M"))),
-                                 column(6, timeInput(paste0("fin_aprem_", jour, "_f2"), "Fin après-midi :", value = strptime("18:00", format = "%H:%M")))
-                               ),
-                               fluidRow(
-                                 column(12, checkboxGroupInput(paste0("repas_", jour, "_f2"), "Repas pris en charge :", choices = c("Petit-déjeuner", "Déjeuner", "Goûter", "Dîner"), selected = NULL))
+                               conditionalPanel(
+                                 condition = paste0("input.jour_travaille_", jour, "_f2 == true"),
+                                 fluidRow(
+                                   column(6, timeInput(paste0("debut_matin_", jour, "_f2"), "Début matin :", value = strptime("08:00", format = "%H:%M"))),
+                                   column(6, timeInput(paste0("fin_matin_", jour, "_f2"), "Fin matin :", value = strptime("12:00", format = "%H:%M")))
+                                 ),
+                                 fluidRow(
+                                   column(6, timeInput(paste0("debut_aprem_", jour, "_f2"), "Début après-midi :", value = strptime("14:00", format = "%H:%M"))),
+                                   column(6, timeInput(paste0("fin_aprem_", jour, "_f2"), "Fin après-midi :", value = strptime("18:00", format = "%H:%M")))
+                                 ),
+                                 fluidRow(
+                                   column(12, checkboxGroupInput(paste0("repas_", jour, "_f2"), 
+                                                                 "Repas pris en charge :", 
+                                                                 choices = c("Petit-déjeuner", "Déjeuner", "Goûter", "Dîner"), 
+                                                                 selected = NULL))
+                                 )
                                )
                              )
                            })
@@ -243,33 +271,54 @@ ui <- dashboardPage(
 
 server <- function(input, output, session) {
   
+  # Vérification salaire brut horaire
+  observe({
+    # Famille 1
+    shinyFeedback::feedbackWarning(
+      inputId = "salaire_brut_f1",
+      show = input$salaire_brut_f1 < 12.26,
+      text = "Le salaire brut horaire doit être supérieur ou égal à 12,26 €."
+    )
+    
+    # Famille 2
+    shinyFeedback::feedbackWarning(
+      inputId = "salaire_brut_f2",
+      show = input$salaire_brut_f2 < 12.26,
+      text = "Le salaire brut horaire doit être supérieur ou égal à 12,26 €."
+    )
+  })
+
   #### Calcul des heures totales travaillées par semaine pour une famille donnée ####
   calcul_heures_semaine <- function(input_suffixe) {
     jours <- c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche")
     total_minutes <- 0
     
     for (jour in jours) {
-      matin_debut <- input[[paste0("debut_matin_", jour, input_suffixe)]]
-      matin_fin <- input[[paste0("fin_matin_", jour, input_suffixe)]]
-      aprem_debut <- input[[paste0("debut_aprem_", jour, input_suffixe)]]
-      aprem_fin <- input[[paste0("fin_aprem_", jour, input_suffixe)]]
-      
-      matin_debut <- if (!is.null(matin_debut) && matin_debut != "") as.POSIXct(matin_debut, format = "%H:%M") else NULL
-      matin_fin <- if (!is.null(matin_fin) && matin_fin != "") as.POSIXct(matin_fin, format = "%H:%M") else NULL
-      aprem_debut <- if (!is.null(aprem_debut) && aprem_debut != "") as.POSIXct(aprem_debut, format = "%H:%M") else NULL
-      aprem_fin <- if (!is.null(aprem_fin) && aprem_fin != "") as.POSIXct(aprem_fin, format = "%H:%M") else NULL
-      
-      if (!is.null(matin_debut) && !is.null(matin_fin)) {
-        total_minutes <- total_minutes + as.numeric(difftime(matin_fin, matin_debut, units = "mins"))
-      }
-      
-      if (!is.null(aprem_debut) && !is.null(aprem_fin)) {
-        total_minutes <- total_minutes + as.numeric(difftime(aprem_fin, aprem_debut, units = "mins"))
+      if (isTRUE(input[[paste0("jour_travaille_", jour, input_suffixe)]])) {
+        matin_debut <- input[[paste0("debut_matin_", jour, input_suffixe)]]
+        matin_fin <- input[[paste0("fin_matin_", jour, input_suffixe)]]
+        aprem_debut <- input[[paste0("debut_aprem_", jour, input_suffixe)]]
+        aprem_fin <- input[[paste0("fin_aprem_", jour, input_suffixe)]]
+        
+        matin_debut <- if (!is.null(matin_debut) && matin_debut != "") as.POSIXct(matin_debut, format = "%H:%M") else NULL
+        matin_fin <- if (!is.null(matin_fin) && matin_fin != "") as.POSIXct(matin_fin, format = "%H:%M") else NULL
+        aprem_debut <- if (!is.null(aprem_debut) && aprem_debut != "") as.POSIXct(aprem_debut, format = "%H:%M") else NULL
+        aprem_fin <- if (!is.null(aprem_fin) && aprem_fin != "") as.POSIXct(aprem_fin, format = "%H:%M") else NULL
+        
+        if (!is.null(matin_debut) && !is.null(matin_fin)) {
+          total_minutes <- total_minutes + as.numeric(difftime(matin_fin, matin_debut, units = "mins"))
+        }
+        
+        if (!is.null(aprem_debut) && !is.null(aprem_fin)) {
+          total_minutes <- total_minutes + as.numeric(difftime(aprem_fin, aprem_debut, units = "mins"))
+        }
       }
     }
     
     return(total_minutes / 60) # Convertir les minutes en heures
   }
+  
+
   
   #### Calcul des indemnités repas ####
   calcul_indemnite_repas <- function(input_suffixe) {
@@ -277,17 +326,21 @@ server <- function(input, output, session) {
     total_indemnite <- 0
     
     for (jour in jours) {
-      repas_selectionnes <- input[[paste0("repas_", jour, input_suffixe)]]
-      
-      if (!is.null(repas_selectionnes)) {
-        total_indemnite <- total_indemnite + 
-          sum(1.5 * (repas_selectionnes %in% c("Petit-déjeuner", "Goûter"))) +
-          sum(4.5 * (repas_selectionnes %in% c("Déjeuner", "Dîner")))
+      if (isTRUE(input[[paste0("jour_travaille_", jour, input_suffixe)]])) {
+        repas_selectionnes <- input[[paste0("repas_", jour, input_suffixe)]]
+        
+        if (!is.null(repas_selectionnes)) {
+          total_indemnite <- total_indemnite + 
+            sum(1.5 * (repas_selectionnes %in% c("Petit-déjeuner", "Goûter"))) +
+            sum(4.5 * (repas_selectionnes %in% c("Déjeuner", "Dîner")))
+        }
       }
     }
     
     return(total_indemnite)
   }
+    
+
   
   #### Observer le bouton pour calculer les résultats ####
   observeEvent(input$calcul_global, {
@@ -311,6 +364,7 @@ server <- function(input, output, session) {
     heures_totales <- heures_f1 + heures_f2
     salaire_annuel_total <- salaire_annuel_f1 + salaire_annuel_f2
     
+    
     output$resultats_combines <- renderText({
       paste(
         "Résultats pour la Famille 1 :\n",
@@ -332,7 +386,7 @@ server <- function(input, output, session) {
         "Résultats combinés :\n",
         "- Heures totales par semaine : ", round(heures_totales, 2), "h\n",
         "- Salaire annualisé total : ", round(salaire_annuel_total, 2), "€\n",
-        "- Indemnités repas totales : ", round(indemnite_f1 + indemnite_f2, 2), "€\n\n"
+        "- Indemnités repas totales : ", round(indemnite_f1 + indemnite_f2, 2), "€\n"
       )
     })
   })
@@ -443,8 +497,8 @@ server <- function(input, output, session) {
       rownames = FALSE
     )
   })
-}
 
+}
 
 # Lancer l'application
 shinyApp(ui, server)
