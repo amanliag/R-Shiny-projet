@@ -9,16 +9,19 @@ source('../fonctions.R')
 # Charger les paquets
 lapply(required_packages, require, character.only = TRUE)
 
+
+sidebar <-     sidebarMenu(
+  menuItem("Simulateur", tabName = "simulateur", icon = icon("chart-pie")),
+  menuItem("Etudes de cas", tabName = "etude_cas", icon = icon("user")),
+  menuItem("Législation à respecter", tabName = "legislation", icon = icon("book")),
+  menuItem("Droits et aides de l'employeur", tabName = "droits_aides", icon = icon("hand-holding-usd"))
+)
+
 # UI
 ui <- dashboardPage(
   dashboardHeader(title = "Coût - garde partagé"),
   dashboardSidebar(
-    sidebarMenu(
-      menuItem("Simulateur", tabName = "simulateur", icon = icon("chart-pie")),
-      menuItem("Etudes de cas", tabName = "etude_cas", icon = icon("user")),
-      menuItem("Législation à respecter", tabName = "legislation", icon = icon("book")),
-      menuItem("Droits et aides de l'employeur", tabName = "droits_aides", icon = icon("hand-holding-usd"))
-    )
+    sidebar
   ),
   dashboardBody(
     useShinyFeedback(),
@@ -67,8 +70,20 @@ ui <- dashboardPage(
                                )
                              )
                            })
+                           ),
+                         wellPanel(
+                           style = "background-color: #fff; border: 1px solid #333;",
+                           h4("Aides financières :"),
+                           checkboxInput("cmg_f1", "Complément de libre choix du mode de garde (CMG)", value = FALSE),
+                           conditionalPanel(
+                             condition = "input.cmg_f1 == true",
+                             numericInput("valeur_cmg_f1", "Montant CMG (€) :", value = NULL, min = 0)
+                           ),
+                           
+                           h5("Droit au crédit d'impôt :"),
+                           textOutput("credit_impot_f1")
                          )
-                       )
+                         )
                 ),
                 column(6,
                        wellPanel(
@@ -76,7 +91,7 @@ ui <- dashboardPage(
                          h3("Famille 2"),
                          wellPanel(
                            style = "background-color: #fff; border: 1px solid #333;",
-                           numericInput("salaire_brut_f1", "Salaire brut horaire (€) :", value = 12.26, min = 12.26)
+                           numericInput("salaire_brut_f2", "Salaire brut horaire (€) :", value = 12.26, min = 12.26)
                          ),
                          wellPanel(
                            style = "background-color: #fff; border: 1px solid #333;",
@@ -89,9 +104,7 @@ ui <- dashboardPage(
                                  column(12, 
                                         checkboxInput(paste0("jour_travaille_", jour, "_f2"), 
                                                       label = paste(jour, "travaillé ?"), 
-                                                      value = FALSE)
-                                 )
-                               ),
+                                                      value = FALSE))),
                                conditionalPanel(
                                  condition = paste0("input.jour_travaille_", jour, "_f2 == true"),
                                  fluidRow(
@@ -106,13 +119,24 @@ ui <- dashboardPage(
                                    column(12, checkboxGroupInput(paste0("repas_", jour, "_f2"), 
                                                                  "Repas pris en charge :", 
                                                                  choices = c("Petit-déjeuner", "Déjeuner", "Goûter", "Dîner"), 
-                                                                 selected = NULL))
-                                 )
+                                                                 selected = NULL)))
                                )
                              )
-                           })
-                         )
-                       )
+                         })
+                    )
+                    ,
+                    wellPanel(
+                      style = "background-color: #fff; border: 1px solid #333;",
+                      h4("Aides financières :"),
+                      checkboxInput("cmg_f2", "Complément de libre choix du mode de garde (CMG)", value = FALSE),
+                      conditionalPanel(
+                        condition = "input.cmg_f2 == true",
+                        numericInput("valeur_cmg_f2", "Montant CMG (€) :", value = NULL, min = 0)
+                      ),
+                      h5("Droit au crédit d'impôt :"),
+                      textOutput("credit_impot_f2")
+                    )
+                  )
                 )
               ),
               fluidRow(
@@ -344,48 +368,106 @@ server <- function(input, output, session) {
   
   #### Observer le bouton pour calculer les résultats ####
   observeEvent(input$calcul_global, {
-    salaire_brut_f1 <- as.numeric(input$salaire_brut_f1)
-    salaire_brut_f2 <- as.numeric(input$salaire_brut_f2)
+    salaire_brut_f1 <- as.numeric(input$salaire_brut_f1) #horaire
+    salaire_brut_f2 <- as.numeric(input$salaire_brut_f2) #horaire
     
     heures_f2 <- calcul_heures_semaine("_f2")
     heures_f1 <- calcul_heures_semaine("_f1")
     
     # Famille 1
-    salaire_annuel_f1 <- calcul_salaire_mensualise_partage(heures_f1, heures_f2, salaire_brut_f1, salaire_brut_f2, 52)$salaire_f1
+    salaire_annuel_f1 <- calcul_salaire_mensualise_partage(heures_f1, heures_f2, salaire_brut_f1, salaire_brut_f2, 52)$salaire_f1 #mensualise
     charges_f1 <- charges_patronales(salaire_brut_f1)    
     indemnite_f1 <- calcul_indemnite_repas("_f1")
+    salaire_brut_an_f1 <- 52 * heures_f1 * salaire_brut_f1 #il faudra changer 52 pour le nombre de semaines travaillées 
     
     # Famille 2
     salaire_annuel_f2 <- calcul_salaire_mensualise_partage(heures_f1, heures_f2, salaire_brut_f1, salaire_brut_f2, 52)$salaire_f2
     charges_f2 <- charges_patronales(salaire_brut_f2)    
     indemnite_f2 <- calcul_indemnite_repas("_f2")
+    salaire_brut_an_f2 <- 52 * heures_f2 * salaire_brut_f2 #il faudra changer 52 pour le nombre de semaines travaillées 
     
     # Total global
     heures_totales <- heures_f1 + heures_f2
-    salaire_annuel_total <- salaire_annuel_f1 + salaire_annuel_f2
+    salaire_net_annuel_mensualise <- repartition_salaire_net_mensualise(heures_f1, heures_f2, salaire_brut_f1, salaire_brut_f2, semaines_travaillees = 52)$total_contribution_net
+
     
+    
+    #CMG Complément libre choix de garde
+    cmg_f1 <- if (input$cmg_f1) input$valeur_cmg_f1 else 0
+    cmg_f2 <- if (input$cmg_f2) input$valeur_cmg_f2 else 0
+    cmg_f1_mensuel <- if (input$cmg_f1) input$valeur_cmg_f1 else 0
+    cmg_f2_mensuel <- if (input$cmg_f2) input$valeur_cmg_f2 else 0
+    
+    salaire_annualise_brut_apresCMG_f1 <- salaire_annuel_f1 - cmg_f1_mensuel
+    salaire_annualise_brut_apresCMG_f2 <- salaire_annuel_f2 - cmg_f2_mensuel
+    
+    #CI Crédit d'impôt
+    credit_impot_f1 <- {
+      plafond_deduction <- 3500
+      frais_garde <- salaire_annualise_brut_apresCMG_f1
+      frais_deductibles <- max(0, frais_garde)
+      frais_eligibles <- min(plafond_deduction, frais_deductibles)
+      credit_impot <- 0.5 * frais_eligibles
+      credit_impot
+    }
+    
+    output$credit_impot_f1 <- renderText({
+      if (credit_impot_f1 > 0) {
+        paste("OUI :", round(credit_impot_f1, 2), "€")
+      } else {
+        "NON"
+      }
+    })
+    
+    
+    credit_impot_f2 <- {
+      plafond_deduction <- 3500
+      frais_garde <- salaire_annualise_brut_apresCMG_f2
+      frais_deductibles <- max(0, frais_garde)
+      frais_eligibles <- min(plafond_deduction, frais_deductibles)
+      credit_impot <- 0.5 * frais_eligibles
+      credit_impot
+    }
+    
+    output$credit_impot_f2 <- renderText({
+      if (credit_impot_f2 > 0) {
+        paste("OUI :", round(credit_impot_f2, 2), "€")
+      } else {
+        "NON"
+      }
+    })
+    
+    
+    # Calcul des salaires après crédit d'impôt
+    salaire_mensualise_f1 <- salaire_annualise_brut_apresCMG_f1 - credit_impot_f1 / 12
+    salaire_mensualise_f2 <- salaire_annualise_brut_apresCMG_f2 - credit_impot_f2 / 12
+
     
     output$resultats_combines <- renderText({
       paste(
         "Résultats pour la Famille 1 :\n",
         "- Salaire brut horaire : ", salaire_brut_f1, "€\n",
         "- Heures par semaine : ", round(heures_f1, 2), "h\n",
-        "- Salaire annualisé brut : ", round(salaire_annuel_f1, 2), "€\n",
+        "- Montant annuel et mensuel CMG : ", ifelse(cmg_f1 > 0, paste(cmg_f1, "€ ;"), "Non applicable ;"), ifelse(cmg_f1 !=0 , paste(cmg_f1_mensuel, "€\n"), "\n"),
+        "- Droit au crédit d'impôt : ", ifelse(credit_impot_f1 > 0, paste("OUI :", round(credit_impot_f1, 2), "€"), "NON"), "\n",
+        "- Salaire annualisé brut (après déduction de la CMG si applicable): ", round(salaire_annualise_brut_apresCMG_f1, 2), "€\n",
         "- Indemnités repas: ", round((indemnite_f1*52)/12,2), "€\n",
         "- Charges patronales par mois:", charges_patronales(salaire_annuel_f1), "€\n",
-        "- Coût total par mois :", round(salaire_annuel_f1, 2) + round((indemnite_f1*52)/12, 2) + charges_f1, "€\n\n",
+        "- Coût total par mois :", round(salaire_mensualise_f1, 2) + round((indemnite_f1*52)/12, 2) + charges_f1, "€\n\n",
         
         "Résultats pour la Famille 2 :\n",
         "- Salaire brut horaire : ", salaire_brut_f2, "€\n",
         "- Heures par semaine : ", round(heures_f2, 2), "h\n",
-        "- Salaire annualisé : ", round(salaire_annuel_f2, 2), "€\n",
+        " -Montant annuel et mensuel CMG : ", ifelse(cmg_f2 > 0, paste(cmg_f2, "€ ;"), "Non applicable ;"), ifelse(cmg_f2 !=0 , paste(cmg_f2_mensuel, "€\n"), "\n"),
+        "- Droit au crédit d'impôt : ", ifelse(credit_impot_f2 > 0, paste("OUI :", round(credit_impot_f2, 2), "€"), "NON"), "\n",
+        "- Salaire annualisé brut (après déduction de la CMG si applicable): ", round(salaire_annualise_brut_apresCMG_f2, 2), "€\n",
         "- Indemnités repas : ", round((indemnite_f2*52)/12, 2), "€\n",
         "- Charges patronales :", charges_patronales(salaire_annuel_f2), "€\n",
-        "- Coût total par mois :", round(salaire_annuel_f2, 2) + round((indemnite_f2*52)/12, 2) + charges_f2, "€\n\n",
+        "- Coût total par mois :", round(salaire_mensualise_f2, 2) + round((indemnite_f2*52)/12, 2) + charges_f2, "€\n\n",
         
         "Résultats combinés :\n",
         "- Heures totales par semaine : ", round(heures_totales, 2), "h\n",
-        "- Salaire annualisé total : ", round(salaire_annuel_total, 2), "€\n",
+        "- Salaire annualisé total net : ", round(salaire_net_annuel_mensualise, 2), "€\n",
         "- Indemnités repas totales : ", round(indemnite_f1 + indemnite_f2, 2), "€\n"
       )
     })
@@ -420,17 +502,17 @@ server <- function(input, output, session) {
     salaire_brut_f1 <- as.numeric(input$salaire_brut_f1)
     salaire_brut_f2 <- as.numeric(input$salaire_brut_f2)
     
-    revenu_f1 <- calcul_salaire_mensualise_partage(heures_f1, 0, salaire_brut_f1, 52)$salaire_f1
-    revenu_f2 <- calcul_salaire_mensualise_partage(0, heures_f2, salaire_brut_f2, 52)$salaire_f2
+    revenu_f1 <- calcul_salaire_mensualise_partage(heures_f1, 0, salaire_brut_f1,0, 52)$salaire_f1
+    revenu_f2 <- calcul_salaire_mensualise_partage(0, heures_f2,0, salaire_brut_f2, 52)$salaire_f2
     
     data <- data.frame(
       Famille = c("Famille 1", "Famille 2"),
       Revenus = c(revenu_f1, revenu_f2)
     )
-    
+
     p <- ggplot(data, aes(x = Famille, y = Revenus, fill = Famille)) +
       geom_bar(stat = "identity", show.legend = FALSE) +
-      labs(title = "Revenus par famille", y = "Revenus (€)", x = "Famille") +
+      labs(title = "Tarif brut à payer par famille", y = "Revenus (€)", x = "Famille") +
       theme_minimal()
     
     ggplotly(p)
