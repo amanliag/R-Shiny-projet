@@ -19,6 +19,8 @@ L'interface contient 4 onglets principaux:  Simulateur, Etude de cas, Législati
 Le simulateur est l'endroit où il faut saisir les données des deux familles pour réaliser les calculs de coût. 
 Les inputs actuels sont le salaire brut horaire pour chaque famille, les jours travaillés (case à cocher) puis les heures travaillées par journée pour chaque famille, les repas pris en charge par jour et la possibilité d'indiquer s'il y a des périodes de vacances.
 Les sorties actuelles sont les salaires nets et bruts (par heure et mensualisés), les coûts totaux pour les familles dont les salaires, les charges patronales, les indemnités des repas. 
+L'utilisateur doit ajouter manuellement le Complément de libre choix du modèle de garde (CMG) pour toute l'année. 
+Le simulateur calcule automatiquement si la famille a le droit au crédit d'impot.
 A cela s'ajoute deux graphiques simples à barres concernant les heures totales de chaque famille et le coût.
 
 Des messsages d'avertissement guident l'utilisateur concernant le remplissage des informations (ex: un message d'avertissement s'affiche si le salaire brut horaire renseigné est inférieur au seuil).
