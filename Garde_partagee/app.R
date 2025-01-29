@@ -311,6 +311,58 @@ server <- function(input, output, session) {
       text = "Le salaire brut horaire doit être supérieur ou égal à 12,26 €."
     )
   })
+  
+  #Vérification du non dépassement des 13heures de travail par jour
+  observeEvent({
+    unlist(lapply(c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"), function(jour) {
+      c(input[[paste0("debut_matin_", jour, "_f1")]], input[[paste0("fin_matin_", jour, "_f1")]], 
+        input[[paste0("debut_aprem_", jour, "_f1")]], input[[paste0("fin_aprem_", jour, "_f1")]],
+        input[[paste0("debut_matin_", jour, "_f2")]], input[[paste0("fin_matin_", jour, "_f2")]],
+        input[[paste0("debut_aprem_", jour, "_f2")]], input[[paste0("fin_aprem_", jour, "_f2")]])}))}, 
+    {
+    jours <- c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche")
+    for (jour in jours) {
+      horaires_f1 <- c()
+      horaires_f2 <- c()
+      #heures f1
+      if (isTRUE(input[[paste0("jour_travaille_", jour, "_f1")]])) {
+        matin_debut_f1 <- input[[paste0("debut_matin_", jour, "_f1")]]
+        matin_fin_f1 <- input[[paste0("fin_matin_", jour, "_f1")]]
+        aprem_debut_f1 <- input[[paste0("debut_aprem_", jour, "_f1")]]
+        aprem_fin_f1 <- input[[paste0("fin_aprem_", jour, "_f1")]]
+        
+        horaires_f1 <- c(matin_debut_f1, matin_fin_f1, aprem_debut_f1, aprem_fin_f1) }
+      #heures f2
+      if (isTRUE(input[[paste0("jour_travaille_", jour, "_f2")]])) {
+        matin_debut_f2 <- input[[paste0("debut_matin_", jour, "_f2")]]
+        matin_fin_f2 <- input[[paste0("fin_matin_", jour, "_f2")]]
+        aprem_debut_f2 <- input[[paste0("debut_aprem_", jour, "_f2")]]
+        aprem_fin_f2 <- input[[paste0("fin_aprem_", jour, "_f2")]]
+        
+        horaires_f2 <- c(matin_debut_f2, matin_fin_f2, aprem_debut_f2, aprem_fin_f2) }
+      horaires_combines <- c(horaires_f1, horaires_f2)
+      horaires_combines <- horaires_combines[!is.null(horaires_combines) & horaires_combines != ""]
+      
+      if (length(horaires_combines) > 0) {
+        horaires_combines <- as.POSIXct(horaires_combines, format = "%H:%M")
+        heure_min <- min(horaires_combines)
+        heure_max <- max(horaires_combines)
+        
+        amplitude_total <- as.numeric(difftime(heure_max, heure_min, units = "hours"))
+        if (amplitude_total > 13) {
+          showModal(modalDialog(
+            title = paste("⚠️ Avertissement ⚠️ : 13 heures de travail ont été dépassées -", jour),
+            paste("Actuellement :", round(amplitude_total, 2), "h."),
+            easyClose = FALSE, 
+            footer = modalButton("OK")))}}
+    }
+  }, ignoreNULL = FALSE, ignoreInit = TRUE)
+  
+  
+  
+  
+  
+  
 
   #### Calcul des heures totales travaillées par semaine pour une famille donnée ####
   calcul_heures_semaine <- function(input_suffixe) {
