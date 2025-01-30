@@ -86,6 +86,7 @@ ui <- dashboardPage(
                          wellPanel(
                            style = "background-color: #fff; border: 1px solid #333;",
                            h4("Forfait déplacement :"),
+                           
                            checkboxGroupInput(
                              inputId = "moyens_de_deplacement",
                              label = NULL,
@@ -96,8 +97,37 @@ ui <- dashboardPage(
                                tagList(icon("car"), " Voiture")
                              ),
                              choiceValues = list("Aucun", "Vélo", "Transports en commun", "Voiture")
+                           ),
+                           
+                           conditionalPanel(
+                             condition = "input.moyens_de_deplacement.includes('Vélo')",
+                             numericInput(
+                               inputId = "km_par_semaine",
+                               label = "Nombre de kilomètres en vélo par semaine :",
+                               value = NULL,
+                               min = 0
+                             )
+                           ),
+                           conditionalPanel(
+                             condition = "input.moyens_de_deplacement.includes('Transports en commun')",
+                             numericInput(
+                               inputId = "Tarif_transports_communs",
+                               label = "Tarif des tickets OU de l'abonnement (pris en charge à 50% par l'employeur):",
+                               value = NULL,
+                               min = 0
+                             )
+                           ),
+                           conditionalPanel(
+                             condition = "input.moyens_de_deplacement.includes('Voiture')",
+                             numericInput(
+                               inputId = "km_voiture_par_semaine",
+                               label = "Nombre de kilomètres en voiture par semaine :",
+                               value = NULL,
+                               min = 0
+                             )
                            )
                          )
+                         
                          )
                 ),
                 column(6,
@@ -155,6 +185,7 @@ ui <- dashboardPage(
                     wellPanel(
                       style = "background-color: #fff; border: 1px solid #333;",
                       h4("Forfait déplacement :"),
+                      
                       checkboxGroupInput(
                         inputId = "moyens_de_deplacement",
                         label = NULL,
@@ -165,6 +196,34 @@ ui <- dashboardPage(
                           tagList(icon("car"), " Voiture")
                         ),
                         choiceValues = list("Aucun", "Vélo", "Transports en commun", "Voiture")
+                      ),
+                      
+                      conditionalPanel(
+                        condition = "input.moyens_de_deplacement.includes('Vélo')",
+                        numericInput(
+                          inputId = "km_par_semaine",
+                          label = "Nombre de kilomètres en vélo par semaine :",
+                          value = NULL,
+                          min = 0
+                        )
+                      ),
+                      conditionalPanel(
+                        condition = "input.moyens_de_deplacement.includes('Transports en commun')",
+                        numericInput(
+                          inputId = "Tarif_transports_communs",
+                          label = "Tarif des tickets OU de l'abonnement (pris en charge à 50% par l'employeur):",
+                          value = NULL,
+                          min = 0
+                        )
+                      ),
+                      conditionalPanel(
+                        condition = "input.moyens_de_deplacement.includes('Voiture')",
+                        numericInput(
+                          inputId = "km_voiture_par_semaine",
+                          label = "Nombre de kilomètres en voiture par semaine :",
+                          value = NULL,
+                          min = 0
+                        )
                       )
                     )
                     
