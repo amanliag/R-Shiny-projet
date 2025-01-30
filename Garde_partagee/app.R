@@ -82,6 +82,21 @@ ui <- dashboardPage(
                            
                            h5("Droit au crédit d'impôt :"),
                            textOutput("credit_impot_f1")
+                         ),
+                         wellPanel(
+                           style = "background-color: #fff; border: 1px solid #333;",
+                           h4("Forfait déplacement :"),
+                           checkboxGroupInput(
+                             inputId = "moyens_de_deplacement",
+                             label = NULL,
+                             choiceNames = list(
+                               tagList(icon("xmark"), " Aucun"),
+                               tagList(icon("bicycle"), " Vélo"),
+                               tagList(icon("bus"), " Transports en commun"),
+                               tagList(icon("car"), " Voiture")
+                             ),
+                             choiceValues = list("Aucun", "Vélo", "Transports en commun", "Voiture")
+                           )
                          )
                          )
                 ),
@@ -136,18 +151,23 @@ ui <- dashboardPage(
                       h5("Droit au crédit d'impôt :"),
                       textOutput("credit_impot_f2")
                     )
-                    # ,
-                    # wellPanel(
-                    #   style = "background-color: #fff; border: 1px solid #333;",
-                    #   h4("Forfait déplacement :"),
-                    #   checkboxGroupInput("Moyens de déplacements proposés",
-                    #                      choiceNames =
-                    #                        list(icon("xmark"), icon("bicycle"),
-                    #                             icon("bus"), icon("car")),
-                    #                      choiceValues =
-                    #                        list("Aucun", "Vélo", "Transports en commun", "Voiture")
-                    #   )
-                    # )
+                    ,
+                    wellPanel(
+                      style = "background-color: #fff; border: 1px solid #333;",
+                      h4("Forfait déplacement :"),
+                      checkboxGroupInput(
+                        inputId = "moyens_de_deplacement",
+                        label = NULL,
+                        choiceNames = list(
+                          tagList(icon("xmark"), " Aucun"),
+                          tagList(icon("bicycle"), " Vélo"),
+                          tagList(icon("bus"), " Transports en commun"),
+                          tagList(icon("car"), " Voiture")
+                        ),
+                        choiceValues = list("Aucun", "Vélo", "Transports en commun", "Voiture")
+                      )
+                    )
+                    
                   )
                 )
               ),
