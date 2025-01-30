@@ -359,8 +359,45 @@ server <- function(input, output, session) {
   }, ignoreNULL = FALSE, ignoreInit = TRUE)
   
   
+  #Vérification qu'il y a bien un jour de repos si 6 jours consécutifs 
   
-  
+ # famille 1 et famille 2, si elle une des deux a 6 jours cochées, on vérifie que lautre a les 6 mêmes jours cochés ou que le jour non coché 
+  observeEvent({ jours <- c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche")
+      compteur_jours_f1 <- 0
+      compteur_jours_f2 <- 0
+      variable_bool <- FALSE
+      jours_travailles_f1 <- list()
+      jours_travailles_f2 <- list()
+
+      for (jour in jours) {
+        if (isTRUE(input[[paste0("jour_travaille_", jour, "_f1")]])) {
+          compteur_jours_f1 = compteur_jours_f1 +1 }
+          jours_travailles_f1 <- append(jours_travailles_f1, jour)
+
+        if (isTRUE(input[[paste0("jour_travaille_", jour, "_f2")]])) {
+          compteur_jours_f1 = compteur_jours_f1 +1 }
+          jours_travailles_f2 <- append(jours_travailles_f2, jour)
+        }
+
+        if (length(compteurs_jours_f1) == 6 | length(compteurs_jours_f2) == 6) {
+          if (length(compteurs_jours_f1) == length(compteurs_jours_f2)){
+            variable_bool <- setequal(compteurs_jours_f1)}
+        }
+
+        if (length(compteurs_jours_f1) == 7 | length(compteurs_jours_f2) == 7) {
+              variable_bool <- FALSE
+        }
+
+
+        if (variable_bool == FALSE) {
+            showModal(modalDialog(
+              title = paste("⚠️ Avertissement ⚠️ Le jour de repos n'est pas respecté -", jour),
+              paste("Voir LEGISLATION"),
+              easyClose = FALSE,
+              footer = modalButton("OK")))
+        }
+          
+}, ignoreNULL = FALSE, ignoreInit = TRUE)
   
   
 
@@ -417,9 +454,7 @@ server <- function(input, output, session) {
   }
     
 
-  
-  #### Observer le bouton pour calculer les résultats ####
-  observeEvent(input$calcul_global, {
+    observeEvent(input$calcul_global, {
     salaire_brut_f1 <- as.numeric(input$salaire_brut_f1) #horaire
     salaire_brut_f2 <- as.numeric(input$salaire_brut_f2) #horaire
     
