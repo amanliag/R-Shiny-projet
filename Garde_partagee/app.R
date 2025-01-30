@@ -136,6 +136,18 @@ ui <- dashboardPage(
                       h5("Droit au crédit d'impôt :"),
                       textOutput("credit_impot_f2")
                     )
+                    ,
+                    wellPanel(
+                      style = "background-color: #fff; border: 1px solid #333;",
+                      h4("Forfait déplacement :"),
+                      checkboxGroupInput("Moyens de déplacements proposés",
+                                         choiceNames =
+                                           list(icon("xmark"), icon("bicycle"),
+                                                icon("bus"), icon("car")),
+                                         choiceValues =
+                                           list("Aucun", "Vélo", "Transports en commun", "Voiture")
+                      )
+                    )
                   )
                 )
               ),
@@ -278,6 +290,15 @@ ui <- dashboardPage(
                     tags$li(tags$a(href = "https://www.service-public.fr/particuliers/vosdroits/F345", 
                                    "Simulateur disponible ici - site du service public"))
                   )
+                ),
+                box(
+                  title = "Document - Contrat de travail à durée indéterminée (CDI)", 
+                  status = "warning", 
+                  solidHeader = TRUE, 
+                  collapsible = TRUE,
+                  tags$ul(tags$li(tags$a(href = "https://www.pajemploi.urssaf.fr/pajewebinfo/files/live/sites/pajewebinfo/files/contributed/pdf/contrats-de-travail/6237-PE-Contrat-CDI-Pajemploi-Ama-FORMULAIRE.pdf", 
+                                   "Contrat de travail - Document disponible en suivant ce lien"))
+                  )
                 )
                 
               )
@@ -360,9 +381,11 @@ server <- function(input, output, session) {
   
   
   #Vérification qu'il y a bien un jour de repos si 6 jours consécutifs 
-  
+#A REPRENDRE
  # famille 1 et famille 2, si elle une des deux a 6 jours cochées, on vérifie que lautre a les 6 mêmes jours cochés ou que le jour non coché 
-  observeEvent({ jours <- c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche")
+  observeEvent({
+    unlist(lapply(c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"), function(jour) {}))}, 
+  { jours <- c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche")
       compteur_jours_f1 <- 0
       compteur_jours_f2 <- 0
       variable_bool <- FALSE
@@ -371,34 +394,39 @@ server <- function(input, output, session) {
 
       for (jour in jours) {
         if (isTRUE(input[[paste0("jour_travaille_", jour, "_f1")]])) {
-          compteur_jours_f1 = compteur_jours_f1 +1 }
+          compteur_jours_f1 = compteur_jours_f1 +1
           jours_travailles_f1 <- append(jours_travailles_f1, jour)
+          print(compteur_jours_f1)
+      }
 
         if (isTRUE(input[[paste0("jour_travaille_", jour, "_f2")]])) {
-          compteur_jours_f1 = compteur_jours_f1 +1 }
+          compteur_jours_f1 = compteur_jours_f1 +1 
           jours_travailles_f2 <- append(jours_travailles_f2, jour)
+          print(compteur_jours_f2)
         }
+          
 
-        if (length(compteurs_jours_f1) == 6 | length(compteurs_jours_f2) == 6) {
-          if (length(compteurs_jours_f1) == length(compteurs_jours_f2)){
-            variable_bool <- setequal(compteurs_jours_f1)}
-        }
 
         if (length(compteurs_jours_f1) == 7 | length(compteurs_jours_f2) == 7) {
-              variable_bool <- FALSE
+              variable_bool <- TRUE
         }
+          
+          if (length(compteurs_jours_f1) == 6 | length(compteurs_jours_f2) == 6) {
+            if (length(compteurs_jours_f1) == length(compteurs_jours_f2)){
+              variable_bool <- setequal(compteurs_jours_f1)}
+          }
 
 
         if (variable_bool == FALSE) {
             showModal(modalDialog(
-              title = paste("⚠️ Avertissement ⚠️ Le jour de repos n'est pas respecté -", jour),
+              title = paste("⚠️ Avertissement ⚠️ Le jour de repos n'est pas respecté"),
               paste("Voir LEGISLATION"),
               easyClose = FALSE,
               footer = modalButton("OK")))
         }
-          
+      }
 }, ignoreNULL = FALSE, ignoreInit = TRUE)
-  
+
   
 
   #### Calcul des heures totales travaillées par semaine pour une famille donnée ####
@@ -477,7 +505,6 @@ server <- function(input, output, session) {
     heures_totales <- heures_f1 + heures_f2
     salaire_net_annuel_mensualise <- repartition_salaire_net_mensualise(heures_f1, heures_f2, salaire_brut_f1, salaire_brut_f2, semaines_travaillees = 52)$total_contribution_net
 
-    
     
     #CMG Complément libre choix de garde
     cmg_f1 <- if (input$cmg_f1) input$valeur_cmg_f1 else 0
