@@ -136,18 +136,18 @@ ui <- dashboardPage(
                       h5("Droit au crédit d'impôt :"),
                       textOutput("credit_impot_f2")
                     )
-                    ,
-                    wellPanel(
-                      style = "background-color: #fff; border: 1px solid #333;",
-                      h4("Forfait déplacement :"),
-                      checkboxGroupInput("Moyens de déplacements proposés",
-                                         choiceNames =
-                                           list(icon("xmark"), icon("bicycle"),
-                                                icon("bus"), icon("car")),
-                                         choiceValues =
-                                           list("Aucun", "Vélo", "Transports en commun", "Voiture")
-                      )
-                    )
+                    # ,
+                    # wellPanel(
+                    #   style = "background-color: #fff; border: 1px solid #333;",
+                    #   h4("Forfait déplacement :"),
+                    #   checkboxGroupInput("Moyens de déplacements proposés",
+                    #                      choiceNames =
+                    #                        list(icon("xmark"), icon("bicycle"),
+                    #                             icon("bus"), icon("car")),
+                    #                      choiceValues =
+                    #                        list("Aucun", "Vélo", "Transports en commun", "Voiture")
+                    #   )
+                    # )
                   )
                 )
               ),
@@ -381,52 +381,39 @@ server <- function(input, output, session) {
   
   
   #Vérification qu'il y a bien un jour de repos si 6 jours consécutifs 
-#A REPRENDRE
- # famille 1 et famille 2, si elle une des deux a 6 jours cochées, on vérifie que lautre a les 6 mêmes jours cochés ou que le jour non coché 
-  observeEvent({
-    unlist(lapply(c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"), function(jour) {}))}, 
-  { jours <- c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche")
-      compteur_jours_f1 <- 0
-      compteur_jours_f2 <- 0
-      variable_bool <- FALSE
-      jours_travailles_f1 <- list()
-      jours_travailles_f2 <- list()
-
-      for (jour in jours) {
-        if (isTRUE(input[[paste0("jour_travaille_", jour, "_f1")]])) {
-          compteur_jours_f1 = compteur_jours_f1 +1
-          jours_travailles_f1 <- append(jours_travailles_f1, jour)
-          print(compteur_jours_f1)
+  observe({
+    jours <- c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche")
+    
+    jours_travailles_f1 <- c()
+    jours_travailles_f2 <- c()
+    
+    for (jour in jours) {
+      if (isTRUE(input[[paste0("jour_travaille_", jour, "_f1")]])) {
+        jours_travailles_f1 <- c(jours_travailles_f1, jour)
       }
-
-        if (isTRUE(input[[paste0("jour_travaille_", jour, "_f2")]])) {
-          compteur_jours_f1 = compteur_jours_f1 +1 
-          jours_travailles_f2 <- append(jours_travailles_f2, jour)
-          print(compteur_jours_f2)
-        }
-          
-
-
-        if (length(compteurs_jours_f1) == 7 | length(compteurs_jours_f2) == 7) {
-              variable_bool <- TRUE
-        }
-          
-          if (length(compteurs_jours_f1) == 6 | length(compteurs_jours_f2) == 6) {
-            if (length(compteurs_jours_f1) == length(compteurs_jours_f2)){
-              variable_bool <- setequal(compteurs_jours_f1)}
-          }
-
-
-        if (variable_bool == FALSE) {
-            showModal(modalDialog(
-              title = paste("⚠️ Avertissement ⚠️ Le jour de repos n'est pas respecté"),
-              paste("Voir LEGISLATION"),
-              easyClose = FALSE,
-              footer = modalButton("OK")))
-        }
+      
+      if (isTRUE(input[[paste0("jour_travaille_", jour, "_f2")]])) {
+        jours_travailles_f2 <- c(jours_travailles_f2, jour)
       }
-}, ignoreNULL = FALSE, ignoreInit = TRUE)
-
+    }
+    
+    f1_7_jours <- length(jours_travailles_f1) == 7
+    f2_7_jours <- length(jours_travailles_f2) == 7
+    jours_total <- unique(c(jours_travailles_f1, jours_travailles_f2))
+    couverture <- length(jours_total) == 7
+    
+    if (f1_7_jours || f2_7_jours || couverture) {
+      showModal(modalDialog(
+        title = "⚠️ Avertissement ⚠️",
+        "Une des familles demande la garde de son enfant 7 jours ou toutes les journées de la semaine sont couvertes par les deux familles.",
+        easyClose = TRUE,
+        footer = modalButton("OK")
+      ))
+    }
+  })
+  
+  
+  
   
 
   #### Calcul des heures totales travaillées par semaine pour une famille donnée ####
