@@ -102,7 +102,7 @@ ui <- dashboardPage(
                            conditionalPanel(
                              condition = "input.moyens_de_deplacement_f1.includes('Vélo')",
                              numericInput(
-                               inputId = "km_velo_par_semaine_f1",
+                               inputId = "km_velo_par_mois_f1",
                                label = "Nombre de kilomètres en vélo par mois :",
                                value = NULL,
                                min = 0
@@ -112,16 +112,16 @@ ui <- dashboardPage(
                              condition = "input.moyens_de_deplacement_f1.includes('Transports en commun')",
                              numericInput(
                                inputId = "Tarif_transports_communs_f1",
-                               label = "Tarif des tickets OU de l'abonnement par mois(pris en charge à 50% par l'employeur):",
+                               label = "50% du tarif des tickets OU de l'abonnement par mois pris en charge:",
                                value = NULL,
                                min = 0
                              )
                            ),
                            conditionalPanel(
-                             condition = "input.moyens_de_deplacement_f1.includes('Voiture')",
+                             condition = "input.moyens_de_deplacement_f1.includes('Voiture - 6CV')",
                              numericInput(
-                               inputId = "km_voiture_par_semaine_f1",
-                               label = "Nombre de kilomètres en voiture par mois :",
+                               inputId = "km_voiture_par_mois_f1",
+                               label = "Nombre de kilomètres en voiture par mois (0.41cts/km):",
                                value = NULL,
                                min = 0
                              )
@@ -202,7 +202,7 @@ ui <- dashboardPage(
                         condition = "input.moyens_de_deplacement_f2.includes('Vélo')",
                         numericInput(
                           inputId = "km_velo_par_mois_f2",
-                          label = "Nombre de kilomètres en vélo par mois :",
+                          label = "Nombre de kilomètres en vélo par mois (0.41cts/km):",
                           value = NULL,
                           min = 0
                         )
@@ -211,7 +211,7 @@ ui <- dashboardPage(
                         condition = "input.moyens_de_deplacement_f2.includes('Transports en commun')",
                         numericInput(
                           inputId = "Tarif_transports_communs_f2",
-                          label = "Tarif des tickets OU de l'abonnement par mois (pris en charge à 50% par l'employeur):",
+                          label = "50% du tarif des tickets OU de l'abonnement par mois pris en charge:",
                           value = NULL,
                           min = 0
                         )
@@ -296,7 +296,7 @@ ui <- dashboardPage(
                   collapsible = TRUE,
                   tags$ul(
                     tags$li("Indemnités repas : 1.50€ petit-déjeuner et goûter, 4.50€ déjeuner et dîner"),
-                    tags$li("Indemnités transport : À préciser")
+                    tags$li("Indemnités transport par mois: 5 euros par mois à partir de 20km en vélo ; 0.41cts le km en voiture ; 50% de prise en charge des tarifs de transport en commun")
                   )
                 ),
                 box(
@@ -546,33 +546,53 @@ server <- function(input, output, session) {
     
     return(total_indemnite)
   }
+
+  #Indemnite deplacement
+  calcul_indemnite_deplacement <- function(input_suffixe) {
     
-### Calcul des indemnités de déplacement ### 
-  calcul_indemnite_deplacement <- function(input_suffixe){
-    total_indemnite <- 0 
-    tarif_velo <- 0
-    tarif_voiture <- 0
     tarif_km_voiture <- 0.41 
     moyens_de_transport <- input[[paste0("moyens_de_deplacement_", input_suffixe)]]
-
-    if (isTRUE(input[[paste0("moyens_de_deplacement_", input_suffixe)]])) {
-      if ("Vélo" %in% moyens_de_transport & input[[paste0("km_velo_par_mois_", input_suffixe)]] > 20){
-        tarif_velo <- 5
+    
+    km_velo <- input[[paste0("km_velo_par_mois_", input_suffixe)]]
+    km_voiture <- input[[paste0("km_voiture_par_mois_", input_suffixe)]]
+    tarif_transport <- input[[paste0("Tarif_transports_communs_", input_suffixe)]]
+    
+    if (is.na(km_velo)) km_velo <- 0
+    if (is.na(km_voiture)) km_voiture <- 0
+    if (is.na(tarif_transport)) tarif_transport <- 0
+    tarif_velo <- 0
+    tarif_voiture <- 0
+    tarif_transport_reduction <- 0
+    
+    if (!is.null(moyens_de_transport)) {
+      
+      if ("Vélo" %in% moyens_de_transport && km_velo > 20) {
+        tarif_velo <- 5  
       }
-      print(input[[paste0("km_velo_par_mois_", input_suffixe)]])
-      if ("Voiture - 6CV" %in% moyens_de_transport){
-        tarif_voiture <- tarif_km_voiture * input[[paste0("km_voiture_par_mois_", input_suffixe)]]
+      
+      if ("Voiture - 6CV" %in% moyens_de_transport) {
+        tarif_voiture <- km_voiture * tarif_km_voiture  
+      }
+      
+      if ("Transports en commun" %in% moyens_de_transport) {
+        tarif_transport_reduction <- tarif_transport 
       }
     }
     
-    total_indemnite <- tarif_velo + tarif_voiture 
+    total_indemnite <- tarif_velo + tarif_voiture + tarif_transport_reduction
     
-    return(list(
+        return(list(
       tarif_indemnite_velo = tarif_velo,
       tarif_indemnite_voiture = tarif_voiture,
-      tarif_total = total_indemnite
+      tarif_indemnite_transport_reduction = tarif_transport_reduction,
+      tarif_total = total_indemnite,
+      km_velo = km_velo,
+      km_voiture = km_voiture
     ))
   }
+  
+  
+  
     observeEvent(input$calcul_global, {
     salaire_brut_f1 <- as.numeric(input$salaire_brut_f1) #horaire
     salaire_brut_f2 <- as.numeric(input$salaire_brut_f2) #horaire
@@ -647,6 +667,11 @@ server <- function(input, output, session) {
     salaire_mensualise_f1 <- salaire_annualise_brut_apresCMG_f1 - credit_impot_f1 / 12
     salaire_mensualise_f2 <- salaire_annualise_brut_apresCMG_f2 - credit_impot_f2 / 12
 
+    #Indemnites déplacements 
+    indemnite_km_f1 <- reactive({calcul_indemnite_deplacement("f1")})
+    indemnite_km_f2 <- reactive({calcul_indemnite_deplacement("f2")})
+    
+    
     
     output$resultats_combines <- renderText({
       paste(
@@ -657,11 +682,11 @@ server <- function(input, output, session) {
         "- Droit au crédit d'impôt : ", ifelse(credit_impot_f1 > 0, paste("OUI :", round(credit_impot_f1, 2), "€"), "NON"), "\n",
         "- Salaire annualisé brut (après déduction de la CMG si applicable): ", round(salaire_annualise_brut_apresCMG_f1, 2), "€\n",
         "- Indemnités repas: ", round((indemnite_f1*52)/12,2), "€\n",
-        "- Indemnité déplacement vélo: ",  calcul_indemnite_deplacement("f1")$tarif_indemnite_velo, "€ pour", "kilomètres\n",
-        "- Indemnité déplacement voiture: ", calcul_indemnite_deplacement("f1")$tarif_indemnite_voiture, "€ pour", "kilomètres \n",
-        "- Indemnité déplacement transports en commun: ", "€ pour un tarif total de",  "€/n",
+        "- Indemnité déplacement vélo: ", indemnite_km_f1()$tarif_indemnite_velo, "€ pour", indemnite_km_f1()$km_velo ,"kilomètres\n",
+        "- Indemnité déplacement voiture: ", indemnite_km_f1()$tarif_indemnite_voiture, "€ pour", indemnite_km_f1()$km_voiture ," kilomètres \n",
+        "- Indemnité déplacement transports en commun: ",indemnite_km_f1()$tarif_indemnite_transport, "€ \n",
         "- Charges patronales par mois:", charges_patronales(salaire_annuel_f1), "€\n",
-        "- Coût total par mois :", round(salaire_mensualise_f1, 2) + round((indemnite_f1*52)/12, 2) + charges_f1, "€\n\n",
+        "- Coût total par mois :", round(salaire_mensualise_f1, 2) + round((indemnite_f1*52)/12, 2) + charges_f1 + indemnite_km_f1()$tarif_total, "€\n\n",
         
         "Résultats pour la Famille 2 :\n",
         "- Salaire brut horaire : ", salaire_brut_f2, "€\n",
@@ -670,8 +695,11 @@ server <- function(input, output, session) {
         "- Droit au crédit d'impôt : ", ifelse(credit_impot_f2 > 0, paste("OUI :", round(credit_impot_f2, 2), "€"), "NON"), "\n",
         "- Salaire annualisé brut (après déduction de la CMG si applicable): ", round(salaire_annualise_brut_apresCMG_f2, 2), "€\n",
         "- Indemnités repas : ", round((indemnite_f2*52)/12, 2), "€\n",
+        "- Indemnité déplacement vélo: ", indemnite_km_f2()$tarif_indemnite_velo, "€ pour", indemnite_km_f2()$km_velo ,"kilomètres\n",
+        "- Indemnité déplacement voiture: ", indemnite_km_f2()$tarif_indemnite_voiture, "€ pour", indemnite_km_f2()$km_voiture ," kilomètres \n",
+        "- Indemnité déplacement transports en commun: ",indemnite_km_f2()$tarif_indemnite_transport, "€ \n",
         "- Charges patronales :", charges_patronales(salaire_annuel_f2), "€\n",
-        "- Coût total par mois :", round(salaire_mensualise_f2, 2) + round((indemnite_f2*52)/12, 2) + charges_f2, "€\n\n",
+        "- Coût total par mois :", round(salaire_mensualise_f2, 2) + round((indemnite_f2*52)/12, 2) + charges_f2 + indemnite_km_f2()$tarif_total , "€\n\n",
         
         "Résultats combinés :\n",
         "- Heures totales par semaine : ", round(heures_totales, 2), "h\n",
