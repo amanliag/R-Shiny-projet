@@ -8,7 +8,26 @@ Pour réaliser cela, nous utilisons des informations conformes à la réglementa
  
 Le code de l'application se situe à cet emplacement : Garde_partagee/app.R et les librairies nécessaires sont dans le fichier dependencies.R (mais normalement, les librairies s'installent lors du lancement de l'application si elles sont absentes de l'environnement). Les fonctions princicpales se situent dans le fichier fonctions.R, même s'il demeure encore quelques fonctions incluses dans app.R . 
 
+## A améliorer: 
+
 ATTENTION: Les semaines de congés, les jours fériés et toutes les réglementations ne sont pas encore pris en compte dans les calculs !
+
+A venir quant aux fonctionnalités: 
+
+- Agencer les sorties textes en tableau 
+- Pouvoir télécharger les informations (format .csv)
+- Calculer correctement les heures complémentaires et les heures majorées
+- Message d'alerte pour ne pas dépasser le taux horaire/semaine légal
+- Ne pas être obligé de fermer l'application pour remettre à 0 les entrées
+- Ajout de graphiques pour une meilleure visualisation
+- Actuellement nous considérons que chaque famille ne fait garder qu'un enfant.
+- Un résumé de la réglementation permettant aux personnes utilisant le simulateur de connaître les critères de calculs.
+- Comptabiliser correctement les semaines de vacances et les jours non travaillés exceptionnels dans les jours comptés.
+
+A venir quant au code: 
+
+- Eviter les répétitions de code car répétition pour les deux familles
+- Mieux organiser le code en différents fichiers et mettre les fonctions aux bons endroits
 
 ## Fonctionnalités mises en place
 
@@ -40,7 +59,7 @@ Cet onglet contient diverses informations concernant les droits de l'assistante 
 - Charges sociales et salaire minimum 
 - Durée et orgnaisation du travail 
 - Repos et vacances 
-- Indemnités
+- Indemnités repas et transport
 - Formule du salaire annualisé 
 - Calcul des congés payés 
 - Travail de nuit 
@@ -55,11 +74,5 @@ Cet onglet contient des informations quant aux aides que peut percevoir un paren
 ### Prérequis pour l'utilisation de l'application
 
 R et Rstudio sont évidemment essentiels, avec les packages suivant: shiny, shinydashboard, shinyWidgets, shinyTime, tidyr, ggplot2.
-
-# A venir
-- Ajout de graphiques pour une meilleure visualisation
--   Actuellement nous considérons que chaque famille ne fait garder qu'un enfant.
--   Un résumé de la réglementation permettant aux personnes utilisant le simulateur de connaître les critères de calculs.
-- Comptabiliser correctement les semaines de vacances et les jours non travaillés exceptionnels dans les jours comptés.
 
 
