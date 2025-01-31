@@ -88,7 +88,7 @@ ui <- dashboardPage(
                            h4("Forfait déplacement :"),
                            
                            checkboxGroupInput(
-                             inputId = "moyens_de_deplacement",
+                             inputId = "moyens_de_deplacement_f1",
                              label = NULL,
                              choiceNames = list(
                                tagList(icon("xmark"), " Aucun"),
@@ -96,32 +96,32 @@ ui <- dashboardPage(
                                tagList(icon("bus"), " Transports en commun"),
                                tagList(icon("car"), " Voiture")
                              ),
-                             choiceValues = list("Aucun", "Vélo", "Transports en commun", "Voiture")
+                             choiceValues = list("Aucun", "Vélo", "Transports en commun", "Voiture - 6CV")
                            ),
                            
                            conditionalPanel(
-                             condition = "input.moyens_de_deplacement.includes('Vélo')",
+                             condition = "input.moyens_de_deplacement_f1.includes('Vélo')",
                              numericInput(
-                               inputId = "km_par_semaine",
-                               label = "Nombre de kilomètres en vélo par semaine :",
+                               inputId = "km_velo_par_semaine_f1",
+                               label = "Nombre de kilomètres en vélo par mois :",
                                value = NULL,
                                min = 0
                              )
                            ),
                            conditionalPanel(
-                             condition = "input.moyens_de_deplacement.includes('Transports en commun')",
+                             condition = "input.moyens_de_deplacement_f1.includes('Transports en commun')",
                              numericInput(
-                               inputId = "Tarif_transports_communs",
-                               label = "Tarif des tickets OU de l'abonnement (pris en charge à 50% par l'employeur):",
+                               inputId = "Tarif_transports_communs_f1",
+                               label = "Tarif des tickets OU de l'abonnement par mois(pris en charge à 50% par l'employeur):",
                                value = NULL,
                                min = 0
                              )
                            ),
                            conditionalPanel(
-                             condition = "input.moyens_de_deplacement.includes('Voiture')",
+                             condition = "input.moyens_de_deplacement_f1.includes('Voiture')",
                              numericInput(
-                               inputId = "km_voiture_par_semaine",
-                               label = "Nombre de kilomètres en voiture par semaine :",
+                               inputId = "km_voiture_par_semaine_f1",
+                               label = "Nombre de kilomètres en voiture par mois :",
                                value = NULL,
                                min = 0
                              )
@@ -187,7 +187,7 @@ ui <- dashboardPage(
                       h4("Forfait déplacement :"),
                       
                       checkboxGroupInput(
-                        inputId = "moyens_de_deplacement",
+                        inputId = "moyens_de_deplacement_f2",
                         label = NULL,
                         choiceNames = list(
                           tagList(icon("xmark"), " Aucun"),
@@ -195,32 +195,32 @@ ui <- dashboardPage(
                           tagList(icon("bus"), " Transports en commun"),
                           tagList(icon("car"), " Voiture")
                         ),
-                        choiceValues = list("Aucun", "Vélo", "Transports en commun", "Voiture")
+                        choiceValues = list("Aucun", "Vélo", "Transports en commun", "Voiture - 6CV")
                       ),
                       
                       conditionalPanel(
-                        condition = "input.moyens_de_deplacement.includes('Vélo')",
+                        condition = "input.moyens_de_deplacement_f2.includes('Vélo')",
                         numericInput(
-                          inputId = "km_par_semaine",
-                          label = "Nombre de kilomètres en vélo par semaine :",
+                          inputId = "km_velo_par_mois_f2",
+                          label = "Nombre de kilomètres en vélo par mois :",
                           value = NULL,
                           min = 0
                         )
                       ),
                       conditionalPanel(
-                        condition = "input.moyens_de_deplacement.includes('Transports en commun')",
+                        condition = "input.moyens_de_deplacement_f2.includes('Transports en commun')",
                         numericInput(
-                          inputId = "Tarif_transports_communs",
-                          label = "Tarif des tickets OU de l'abonnement (pris en charge à 50% par l'employeur):",
+                          inputId = "Tarif_transports_communs_f2",
+                          label = "Tarif des tickets OU de l'abonnement par mois (pris en charge à 50% par l'employeur):",
                           value = NULL,
                           min = 0
                         )
                       ),
                       conditionalPanel(
-                        condition = "input.moyens_de_deplacement.includes('Voiture')",
+                        condition = "input.moyens_de_deplacement_f2.includes('Voiture - 6CV')",
                         numericInput(
-                          inputId = "km_voiture_par_semaine",
-                          label = "Nombre de kilomètres en voiture par semaine :",
+                          inputId = "km_voiture_par_mois_f2",
+                          label = "Nombre de kilomètres en voiture par mois :",
                           value = NULL,
                           min = 0
                         )
@@ -547,7 +547,32 @@ server <- function(input, output, session) {
     return(total_indemnite)
   }
     
+### Calcul des indemnités de déplacement ### 
+  calcul_indemnite_deplacement <- function(input_suffixe){
+    total_indemnite <- 0 
+    tarif_velo <- 0
+    tarif_voiture <- 0
+    tarif_km_voiture <- 0.41 
+    moyens_de_transport <- input[[paste0("moyens_de_deplacement_", input_suffixe)]]
 
+    if (isTRUE(input[[paste0("moyens_de_deplacement_", input_suffixe)]])) {
+      if ("Vélo" %in% moyens_de_transport & input[[paste0("km_velo_par_mois_", input_suffixe)]] > 20){
+        tarif_velo <- 5
+      }
+      print(input[[paste0("km_velo_par_mois_", input_suffixe)]])
+      if ("Voiture - 6CV" %in% moyens_de_transport){
+        tarif_voiture <- tarif_km_voiture * input[[paste0("km_voiture_par_mois_", input_suffixe)]]
+      }
+    }
+    
+    total_indemnite <- tarif_velo + tarif_voiture 
+    
+    return(list(
+      tarif_indemnite_velo = tarif_velo,
+      tarif_indemnite_voiture = tarif_voiture,
+      tarif_total = total_indemnite
+    ))
+  }
     observeEvent(input$calcul_global, {
     salaire_brut_f1 <- as.numeric(input$salaire_brut_f1) #horaire
     salaire_brut_f2 <- as.numeric(input$salaire_brut_f2) #horaire
@@ -632,6 +657,9 @@ server <- function(input, output, session) {
         "- Droit au crédit d'impôt : ", ifelse(credit_impot_f1 > 0, paste("OUI :", round(credit_impot_f1, 2), "€"), "NON"), "\n",
         "- Salaire annualisé brut (après déduction de la CMG si applicable): ", round(salaire_annualise_brut_apresCMG_f1, 2), "€\n",
         "- Indemnités repas: ", round((indemnite_f1*52)/12,2), "€\n",
+        "- Indemnité déplacement vélo: ",  calcul_indemnite_deplacement("f1")$tarif_indemnite_velo, "€ pour", "kilomètres\n",
+        "- Indemnité déplacement voiture: ", calcul_indemnite_deplacement("f1")$tarif_indemnite_voiture, "€ pour", "kilomètres \n",
+        "- Indemnité déplacement transports en commun: ", "€ pour un tarif total de",  "€/n",
         "- Charges patronales par mois:", charges_patronales(salaire_annuel_f1), "€\n",
         "- Coût total par mois :", round(salaire_mensualise_f1, 2) + round((indemnite_f1*52)/12, 2) + charges_f1, "€\n\n",
         
