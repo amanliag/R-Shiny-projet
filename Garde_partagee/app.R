@@ -30,14 +30,19 @@ ui <- dashboardPage(
       tabItem(tabName = "simulateur",
               h2("Informations nécessaires à la simulation"),
               fluidRow(
+                column(12,
+                       wellPanel(
+                         style = "background-color: #ffcdba; border: 2px solid #150a0a;",
+                         h3("Salaire brut horaire pour Famille 1 et Famille 2"),
+                         numericInput("salaire_brut", "Salaire brut horaire (€) :", value = 12.26, min = 12.26)
+                       )
+                )
+              ),
+              fluidRow(
                 column(6,
                        wellPanel(
                          style = "background-color: #ffcdba; border: 2px solid #150a0a;",
                          h3("Famille 1"),
-                         wellPanel(
-                           style = "background-color: #fff; border: 1px solid #333;",
-                           numericInput("salaire_brut_f1", "Salaire brut horaire (€) :", value = 12.26, min = 12.26)
-                         ),
                          wellPanel(
                            style = "background-color: #fff; border: 1px solid #333;",
                            h4("Heures travaillées par jour :"),
@@ -54,12 +59,9 @@ ui <- dashboardPage(
                                conditionalPanel(
                                  condition = paste0("input.jour_travaille_", jour, "_f1 == true"),
                                  fluidRow(
-                                   column(6, timeInput(paste0("debut_matin_", jour, "_f1"), "Début matin :", value = strptime("08:00", format = "%H:%M"))),
-                                   column(6, timeInput(paste0("fin_matin_", jour, "_f1"), "Fin matin :", value = strptime("12:00", format = "%H:%M")))
-                                 ),
-                                 fluidRow(
-                                   column(6, timeInput(paste0("debut_aprem_", jour, "_f1"), "Début après-midi :", value = strptime("14:00", format = "%H:%M"))),
-                                   column(6, timeInput(paste0("fin_aprem_", jour, "_f1"), "Fin après-midi :", value = strptime("18:00", format = "%H:%M")))
+                                   column(6, timeInput(paste0("debut_matin_", jour, "_f1"), "Début:", value = "08:00")),
+                              
+                                   column(6, timeInput(paste0("fin_aprem_", jour, "_f1"), "Fin:",  value = "18:00"))
                                  ),
                                  fluidRow(
                                    column(12, checkboxGroupInput(paste0("repas_", jour, "_f1"), 
@@ -82,62 +84,13 @@ ui <- dashboardPage(
                            
                            h5("Droit au crédit d'impôt :"),
                            textOutput("credit_impot_f1")
-                         ),
-                         wellPanel(
-                           style = "background-color: #fff; border: 1px solid #333;",
-                           h4("Forfait déplacement :"),
-                           
-                           checkboxGroupInput(
-                             inputId = "moyens_de_deplacement_f1",
-                             label = NULL,
-                             choiceNames = list(
-                               tagList(icon("xmark"), " Aucun"),
-                               tagList(icon("bicycle"), " Vélo"),
-                               tagList(icon("bus"), " Transports en commun"),
-                               tagList(icon("car"), " Voiture")
-                             ),
-                             choiceValues = list("Aucun", "Vélo", "Transports en commun", "Voiture - 6CV")
-                           ),
-                           
-                           conditionalPanel(
-                             condition = "input.moyens_de_deplacement_f1.includes('Vélo')",
-                             numericInput(
-                               inputId = "km_velo_par_mois_f1",
-                               label = "Nombre de kilomètres en vélo par mois :",
-                               value = NULL,
-                               min = 0
-                             )
-                           ),
-                           conditionalPanel(
-                             condition = "input.moyens_de_deplacement_f1.includes('Transports en commun')",
-                             numericInput(
-                               inputId = "Tarif_transports_communs_f1",
-                               label = "50% du tarif des tickets OU de l'abonnement par mois pris en charge:",
-                               value = NULL,
-                               min = 0
-                             )
-                           ),
-                           conditionalPanel(
-                             condition = "input.moyens_de_deplacement_f1.includes('Voiture - 6CV')",
-                             numericInput(
-                               inputId = "km_voiture_par_mois_f1",
-                               label = "Nombre de kilomètres en voiture par mois (0.41cts/km):",
-                               value = NULL,
-                               min = 0
-                             )
-                           )
                          )
-                         
-                         )
+                    )
                 ),
                 column(6,
                        wellPanel(
                          style = "background-color: #ffcdba; border: 2px solid #150a0a;",
                          h3("Famille 2"),
-                         wellPanel(
-                           style = "background-color: #fff; border: 1px solid #333;",
-                           numericInput("salaire_brut_f2", "Salaire brut horaire (€) :", value = 12.26, min = 12.26)
-                         ),
                          wellPanel(
                            style = "background-color: #fff; border: 1px solid #333;",
                            h4("Heures travaillées par jour :"),
@@ -153,12 +106,9 @@ ui <- dashboardPage(
                                conditionalPanel(
                                  condition = paste0("input.jour_travaille_", jour, "_f2 == true"),
                                  fluidRow(
-                                   column(6, timeInput(paste0("debut_matin_", jour, "_f2"), "Début matin :", value = strptime("08:00", format = "%H:%M"))),
-                                   column(6, timeInput(paste0("fin_matin_", jour, "_f2"), "Fin matin :", value = strptime("12:00", format = "%H:%M")))
-                                 ),
-                                 fluidRow(
-                                   column(6, timeInput(paste0("debut_aprem_", jour, "_f2"), "Début après-midi :", value = strptime("14:00", format = "%H:%M"))),
-                                   column(6, timeInput(paste0("fin_aprem_", jour, "_f2"), "Fin après-midi :", value = strptime("18:00", format = "%H:%M")))
+                                   column(6, timeInput(paste0("debut_matin_", jour, "_f2"), "Début:", value = "08:00")),
+                          
+                                   column(6, timeInput(paste0("fin_aprem_", jour, "_f2"), "Fin:", value = "18:00"))
                                  ),
                                  fluidRow(
                                    column(12, checkboxGroupInput(paste0("repas_", jour, "_f2"), 
@@ -170,6 +120,7 @@ ui <- dashboardPage(
                          })
                     )
                     ,
+                    
                     wellPanel(
                       style = "background-color: #fff; border: 1px solid #333;",
                       h4("Aides financières :"),
@@ -181,53 +132,59 @@ ui <- dashboardPage(
                       h5("Droit au crédit d'impôt :"),
                       textOutput("credit_impot_f2")
                     )
-                    ,
-                    wellPanel(
-                      style = "background-color: #fff; border: 1px solid #333;",
-                      h4("Forfait déplacement :"),
-                      
-                      checkboxGroupInput(
-                        inputId = "moyens_de_deplacement_f2",
-                        label = NULL,
-                        choiceNames = list(
-                          tagList(icon("xmark"), " Aucun"),
-                          tagList(icon("bicycle"), " Vélo"),
-                          tagList(icon("bus"), " Transports en commun"),
-                          tagList(icon("car"), " Voiture")
-                        ),
-                        choiceValues = list("Aucun", "Vélo", "Transports en commun", "Voiture - 6CV")
-                      ),
-                      
-                      conditionalPanel(
-                        condition = "input.moyens_de_deplacement_f2.includes('Vélo')",
-                        numericInput(
-                          inputId = "km_velo_par_mois_f2",
-                          label = "Nombre de kilomètres en vélo par mois (0.41cts/km):",
-                          value = NULL,
-                          min = 0
-                        )
-                      ),
-                      conditionalPanel(
-                        condition = "input.moyens_de_deplacement_f2.includes('Transports en commun')",
-                        numericInput(
-                          inputId = "Tarif_transports_communs_f2",
-                          label = "50% du tarif des tickets OU de l'abonnement par mois pris en charge:",
-                          value = NULL,
-                          min = 0
-                        )
-                      ),
-                      conditionalPanel(
-                        condition = "input.moyens_de_deplacement_f2.includes('Voiture - 6CV')",
-                        numericInput(
-                          inputId = "km_voiture_par_mois_f2",
-                          label = "Nombre de kilomètres en voiture par mois :",
-                          value = NULL,
-                          min = 0
-                        )
-                      )
-                    )
                     
                   )
+                )
+              ),
+              fluidRow(
+                column(12,
+                       wellPanel(
+                         style = "background-color: #ffcdba; border: 2px solid #150a0a;",
+                       wellPanel(
+                         style = "background-color: #fff; border: 1px solid #333;",
+                         h4("Forfait déplacement :"),
+                         
+                         checkboxGroupInput(
+                           inputId = "moyens_de_deplacement",
+                           label = NULL,
+                           choiceNames = list(
+                             tagList(icon("xmark"), " Aucun"),
+                             tagList(icon("bicycle"), " Vélo"),
+                             tagList(icon("bus"), " Transports en commun"),
+                             tagList(icon("car"), " Voiture")
+                           ),
+                           choiceValues = list("Aucun", "Vélo", "Transports en commun", "Voiture - 6CV")
+                         ),
+                         
+                         conditionalPanel(
+                           condition = "input.moyens_de_deplacement.includes('Vélo')",
+                           numericInput(
+                             inputId = "km_velo_par_mois",
+                             label = "Nombre de kilomètres en vélo par mois (0.41cts/km):",
+                             value = NULL,
+                             min = 0
+                           )
+                         ),
+                         conditionalPanel(
+                           condition = "input.moyens_de_deplacement.includes('Transports en commun')",
+                           numericInput(
+                             inputId = "Tarif_transports_communs",
+                             label = "50% du tarif des tickets OU de l'abonnement par mois pris en charge:",
+                             value = NULL,
+                             min = 0
+                           )
+                         ),
+                         conditionalPanel(
+                           condition = "input.moyens_de_deplacement.includes('Voiture - 6CV')",
+                           numericInput(
+                             inputId = "km_voiture_par_mois",
+                             label = "Nombre de kilomètres en voiture par mois :",
+                             value = NULL,
+                             min = 0
+                           )
+                         )
+                       )
+                      )
                 )
               ),
               fluidRow(
@@ -399,47 +356,36 @@ server <- function(input, output, session) {
   observe({
     # Famille 1
     shinyFeedback::feedbackWarning(
-      inputId = "salaire_brut_f1",
-      show = input$salaire_brut_f1 < 12.26,
+      inputId = "salaire_brut",
+      show = input$salaire_brut < 12.26,
       text = "Le salaire brut horaire doit être supérieur ou égal à 12,26 €."
-    )
-    
-    # Famille 2
-    shinyFeedback::feedbackWarning(
-      inputId = "salaire_brut_f2",
-      show = input$salaire_brut_f2 < 12.26,
-      text = "Le salaire brut horaire doit être supérieur ou égal à 12,26 €."
-    )
-  })
+    )})
   
-  #Vérification du non dépassement des 13heures de travail par jour
   observeEvent({
     unlist(lapply(c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"), function(jour) {
-      c(input[[paste0("debut_matin_", jour, "_f1")]], input[[paste0("fin_matin_", jour, "_f1")]], 
-        input[[paste0("debut_aprem_", jour, "_f1")]], input[[paste0("fin_aprem_", jour, "_f1")]],
-        input[[paste0("debut_matin_", jour, "_f2")]], input[[paste0("fin_matin_", jour, "_f2")]],
-        input[[paste0("debut_aprem_", jour, "_f2")]], input[[paste0("fin_aprem_", jour, "_f2")]])}))}, 
-    {
+      c(input[[paste0("debut_matin_", jour, "_f1")]], input[[paste0("fin_aprem_", jour, "_f1")]], 
+        input[[paste0("debut_matin_", jour, "_f2")]], input[[paste0("fin_aprem_", jour, "_f2")]])}))
+  }, 
+  {
     jours <- c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche")
     for (jour in jours) {
       horaires_f1 <- c()
       horaires_f2 <- c()
-      #heures f1
+      
+      # Heures f1
       if (isTRUE(input[[paste0("jour_travaille_", jour, "_f1")]])) {
-        matin_debut_f1 <- input[[paste0("debut_matin_", jour, "_f1")]]
-        matin_fin_f1 <- input[[paste0("fin_matin_", jour, "_f1")]]
-        aprem_debut_f1 <- input[[paste0("debut_aprem_", jour, "_f1")]]
-        aprem_fin_f1 <- input[[paste0("fin_aprem_", jour, "_f1")]]
-        
-        horaires_f1 <- c(matin_debut_f1, matin_fin_f1, aprem_debut_f1, aprem_fin_f1) }
-      #heures f2
+        debut_f1 <- input[[paste0("debut_matin_", jour, "_f1")]]
+        fin_f1 <- input[[paste0("fin_aprem_", jour, "_f1")]]
+        horaires_f1 <- c(debut_f1, fin_f1)
+      }
+      
+      # Heures f2
       if (isTRUE(input[[paste0("jour_travaille_", jour, "_f2")]])) {
-        matin_debut_f2 <- input[[paste0("debut_matin_", jour, "_f2")]]
-        matin_fin_f2 <- input[[paste0("fin_matin_", jour, "_f2")]]
-        aprem_debut_f2 <- input[[paste0("debut_aprem_", jour, "_f2")]]
-        aprem_fin_f2 <- input[[paste0("fin_aprem_", jour, "_f2")]]
-        
-        horaires_f2 <- c(matin_debut_f2, matin_fin_f2, aprem_debut_f2, aprem_fin_f2) }
+        debut_f2 <- input[[paste0("debut_matin_", jour, "_f2")]]
+        fin_f2 <- input[[paste0("fin_aprem_", jour, "_f2")]]
+        horaires_f2 <- c(debut_f2, fin_f2)
+      }
+      
       horaires_combines <- c(horaires_f1, horaires_f2)
       horaires_combines <- horaires_combines[!is.null(horaires_combines) & horaires_combines != ""]
       
@@ -454,9 +400,12 @@ server <- function(input, output, session) {
             title = paste("⚠️ Avertissement ⚠️ : 13 heures de travail ont été dépassées -", jour),
             paste("Actuellement :", round(amplitude_total, 2), "h."),
             easyClose = FALSE, 
-            footer = modalButton("OK")))}}
+            footer = modalButton("OK")))
+        }
+      }
     }
   }, ignoreNULL = FALSE, ignoreInit = TRUE)
+  
   
   
   #Vérification qu'il y a bien un jour de repos si 6 jours consécutifs 
@@ -496,34 +445,67 @@ server <- function(input, output, session) {
   
 
   #### Calcul des heures totales travaillées par semaine pour une famille donnée ####
-  calcul_heures_semaine <- function(input_suffixe) {
+  calcul_heures_semaine <- function(input_suffixe_f1, input_suffixe_f2) {
     jours <- c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche")
-    total_minutes <- 0
+    
+    total_minutes_f1 <- 0
+    total_minutes_f2 <- 0
+    total_minutes_communes <- 0
     
     for (jour in jours) {
-      if (isTRUE(input[[paste0("jour_travaille_", jour, input_suffixe)]])) {
-        matin_debut <- input[[paste0("debut_matin_", jour, input_suffixe)]]
-        matin_fin <- input[[paste0("fin_matin_", jour, input_suffixe)]]
-        aprem_debut <- input[[paste0("debut_aprem_", jour, input_suffixe)]]
-        aprem_fin <- input[[paste0("fin_aprem_", jour, input_suffixe)]]
+      
+      if (isTRUE(input[[paste0("jour_travaille_", jour, input_suffixe_f1)]])) {
+        matin_debut_f1 <- input[[paste0("debut_matin_", jour, input_suffixe_f1)]]
+        aprem_fin_f1 <- input[[paste0("fin_aprem_", jour, input_suffixe_f1)]]
         
-        matin_debut <- if (!is.null(matin_debut) && matin_debut != "") as.POSIXct(matin_debut, format = "%H:%M") else NULL
-        matin_fin <- if (!is.null(matin_fin) && matin_fin != "") as.POSIXct(matin_fin, format = "%H:%M") else NULL
-        aprem_debut <- if (!is.null(aprem_debut) && aprem_debut != "") as.POSIXct(aprem_debut, format = "%H:%M") else NULL
-        aprem_fin <- if (!is.null(aprem_fin) && aprem_fin != "") as.POSIXct(aprem_fin, format = "%H:%M") else NULL
+        matin_debut_f1 <- ifelse(!is.null(matin_debut_f1) && matin_debut_f1 != "", as.POSIXct(matin_debut_f1, format = "%H:%M"), NA)
+        aprem_fin_f1 <- ifelse(!is.null(aprem_fin_f1) && aprem_fin_f1 != "", as.POSIXct(aprem_fin_f1, format = "%H:%M"), NA)
+      } else {
+        matin_debut_f1 <- NA
+        aprem_fin_f1 <- NA
+      }
+      
+      if (isTRUE(input[[paste0("jour_travaille_", jour, input_suffixe_f2)]])) {
+        matin_debut_f2 <- input[[paste0("debut_matin_", jour, input_suffixe_f2)]]
+        aprem_fin_f2 <- input[[paste0("fin_aprem_", jour, input_suffixe_f2)]]
         
-        if (!is.null(matin_debut) && !is.null(matin_fin)) {
-          total_minutes <- total_minutes + as.numeric(difftime(matin_fin, matin_debut, units = "mins"))
-        }
+        matin_debut_f2 <- ifelse(!is.null(matin_debut_f2) && matin_debut_f2 != "", as.POSIXct(matin_debut_f2, format = "%H:%M"), NA)
+        aprem_fin_f2 <- ifelse(!is.null(aprem_fin_f2) && aprem_fin_f2 != "", as.POSIXct(aprem_fin_f2, format = "%H:%M"), NA)
+      } else {
+        matin_debut_f2 <- NA
+        aprem_fin_f2 <- NA
+      }
+      
+      if (!is.na(matin_debut_f1) && !is.na(aprem_fin_f1)) {
+        total_minutes_f1 <- total_minutes_f1 + as.numeric(difftime(aprem_fin_f1, matin_debut_f1, units = "mins"))
+      }
+      
+      if (!is.na(matin_debut_f2) && !is.na(aprem_fin_f2)) {
+        total_minutes_f2 <- total_minutes_f2 + as.numeric(difftime(aprem_fin_f2, matin_debut_f2, units = "mins"))
+      }
+      
+      if (!is.na(matin_debut_f1) && !is.na(aprem_fin_f1) && !is.na(matin_debut_f2) && !is.na(aprem_fin_f2)) {
+        debut_commune <- max(matin_debut_f1, matin_debut_f2, na.rm = TRUE)
+        fin_commune <- min(aprem_fin_f1, aprem_fin_f2, na.rm = TRUE)
         
-        if (!is.null(aprem_debut) && !is.null(aprem_fin)) {
-          total_minutes <- total_minutes + as.numeric(difftime(aprem_fin, aprem_debut, units = "mins"))
+        if (debut_commune < fin_commune) {  # Si il y a un chevauchement
+          total_minutes_communes <- total_minutes_communes + as.numeric(difftime(fin_commune, debut_commune, units = "mins"))
         }
       }
     }
     
-    return(total_minutes / 60) # Convertir les minutes en heures
+    total_minutes_assistante <- total_minutes_f1 + total_minutes_f2 - total_minutes_communes
+    
+    return(list(
+      heures_communes = total_minutes_communes / 60,
+      heures_f1 = total_minutes_f1 / 60,
+      heures_f2 = total_minutes_f2 / 60,
+      heures_assistante = total_minutes_assistante / 60
+    ))
   }
+  
+  
+  
   
 
   
@@ -548,14 +530,14 @@ server <- function(input, output, session) {
   }
 
   #Indemnite deplacement
-  calcul_indemnite_deplacement <- function(input_suffixe) {
+  calcul_indemnite_deplacement <- function() {
     
     tarif_km_voiture <- 0.41 
-    moyens_de_transport <- input[[paste0("moyens_de_deplacement_", input_suffixe)]]
+    moyens_de_transport <- input[[paste0("moyens_de_deplacement")]]
     
-    km_velo <- input[[paste0("km_velo_par_mois_", input_suffixe)]]
-    km_voiture <- input[[paste0("km_voiture_par_mois_", input_suffixe)]]
-    tarif_transport <- input[[paste0("Tarif_transports_communs_", input_suffixe)]]
+    km_velo <- input[[paste0("km_velo_par_mois")]]
+    km_voiture <- input[[paste0("km_voiture_par_mois")]]
+    tarif_transport <- input[[paste0("Tarif_transports_communs")]]
     
     if (is.na(km_velo)) km_velo <- 0
     if (is.na(km_voiture)) km_voiture <- 0
@@ -582,10 +564,11 @@ server <- function(input, output, session) {
     total_indemnite <- tarif_velo + tarif_voiture + tarif_transport_reduction
     
         return(list(
-      tarif_indemnite_velo = tarif_velo,
-      tarif_indemnite_voiture = tarif_voiture,
-      tarif_indemnite_transport_reduction = tarif_transport_reduction,
-      tarif_total = total_indemnite,
+      tarif_indemnite_velo = tarif_velo/2,
+      tarif_indemnite_voiture = tarif_voiture/2,
+      tarif_indemnite_transport_reduction = tarif_transport_reduction/2,
+      tarif_total_assistante = total_indemnite,
+      tarif_total_famille = total_indemnite/2,
       km_velo = km_velo,
       km_voiture = km_voiture
     ))
@@ -594,27 +577,28 @@ server <- function(input, output, session) {
   
   
     observeEvent(input$calcul_global, {
-    salaire_brut_f1 <- as.numeric(input$salaire_brut_f1) #horaire
-    salaire_brut_f2 <- as.numeric(input$salaire_brut_f2) #horaire
-    
-    heures_f2 <- calcul_heures_semaine("_f2")
-    heures_f1 <- calcul_heures_semaine("_f1")
+    salaire_brut <- as.numeric(input$salaire_brut) #horaire
+
+    heures_f2 <- calcul_heures_semaine("_f1", "_f2")$heures_f2 
+    heures_f1 <- calcul_heures_semaine("_f1", "_f2")$heures_f1 
+    heures_communes <- calcul_heures_semaine("_f1", "_f2")$heures_communes
+  
     
     # Famille 1
-    salaire_annuel_f1 <- calcul_salaire_mensualise_partage(heures_f1, heures_f2, salaire_brut_f1, salaire_brut_f2, 52)$salaire_f1 #mensualise
-    charges_f1 <- charges_patronales(salaire_brut_f1)    
+    salaire_annuel_f1 <- calcul_salaire_mensualise_partage(heures_communes, heures_f1, heures_f2, salaire_brut, 52)$salaire_f1 #mensualise
+    charges_f1 <- charges_patronales(salaire_brut)    
     indemnite_f1 <- calcul_indemnite_repas("_f1")
-    salaire_brut_an_f1 <- 52 * heures_f1 * salaire_brut_f1 #il faudra changer 52 pour le nombre de semaines travaillées 
+    salaire_brut_an_f1 <- 52 * heures_f1 * salaire_brut #il faudra changer 52 pour le nombre de semaines travaillées 
     
     # Famille 2
-    salaire_annuel_f2 <- calcul_salaire_mensualise_partage(heures_f1, heures_f2, salaire_brut_f1, salaire_brut_f2, 52)$salaire_f2
-    charges_f2 <- charges_patronales(salaire_brut_f2)    
+    salaire_annuel_f2 <- calcul_salaire_mensualise_partage(heures_communes, heures_f1, heures_f2, salaire_brut, 52)$salaire_f2
+    charges_f2 <- charges_patronales(salaire_brut)    
     indemnite_f2 <- calcul_indemnite_repas("_f2")
-    salaire_brut_an_f2 <- 52 * heures_f2 * salaire_brut_f2 #il faudra changer 52 pour le nombre de semaines travaillées 
+    salaire_brut_an_f2 <- 52 * heures_f2 * salaire_brut #il faudra changer 52 pour le nombre de semaines travaillées 
     
     # Total global
-    heures_totales <- heures_f1 + heures_f2
-    salaire_net_annuel_mensualise <- repartition_salaire_net_mensualise(heures_f1, heures_f2, salaire_brut_f1, salaire_brut_f2, semaines_travaillees = 52)$total_contribution_net
+    heures_totales <- calcul_heures_semaine("_f1", "_f2")$heures_asssistante
+    salaire_net_annuel_mensualise <- repartition_salaire_net_mensualise(heures_f1, heures_f2, salaire_brut, semaines_travaillees = 52)$total_contribution_net
 
     
     #CMG Complément libre choix de garde
@@ -668,54 +652,58 @@ server <- function(input, output, session) {
     salaire_mensualise_f2 <- salaire_annualise_brut_apresCMG_f2 - credit_impot_f2 / 12
 
     #Indemnites déplacements 
-    indemnite_km_f1 <- reactive({calcul_indemnite_deplacement("f1")})
-    indemnite_km_f2 <- reactive({calcul_indemnite_deplacement("f2")})
-    
+    indemnite_km <- reactive({calcul_indemnite_deplacement()})
+
     
     
     output$resultats_combines <- renderText({
       paste(
         "Résultats pour la Famille 1 :\n",
-        "- Salaire brut horaire : ", salaire_brut_f1, "€\n",
-        "- Heures par semaine : ", round(heures_f1, 2), "h\n",
+        "- Salaire brut horaire : ", salaire_brut, "€\n",
+        "- Heures par semaine : ", heures_f1, "h\n",
         "- Montant annuel et mensuel CMG : ", ifelse(cmg_f1 > 0, paste(cmg_f1, "€ ;"), "Non applicable ;"), ifelse(cmg_f1 !=0 , paste(cmg_f1_mensuel, "€\n"), "\n"),
         "- Droit au crédit d'impôt : ", ifelse(credit_impot_f1 > 0, paste("OUI :", round(credit_impot_f1, 2), "€"), "NON"), "\n",
         "- Salaire annualisé brut (après déduction de la CMG si applicable): ", round(salaire_annualise_brut_apresCMG_f1, 2), "€\n",
         "- Indemnités repas: ", round((indemnite_f1*52)/12,2), "€\n",
-        "- Indemnité déplacement vélo: ", indemnite_km_f1()$tarif_indemnite_velo, "€ pour", indemnite_km_f1()$km_velo ,"kilomètres\n",
-        "- Indemnité déplacement voiture: ", indemnite_km_f1()$tarif_indemnite_voiture, "€ pour", indemnite_km_f1()$km_voiture ," kilomètres \n",
-        "- Indemnité déplacement transports en commun: ",indemnite_km_f1()$tarif_indemnite_transport, "€ \n",
+        "- Indemnité déplacement vélo: ", indemnite_km()$tarif_indemnite_velo, "€ pour", indemnite_km()$km_velo ,"kilomètres\n",
+        "- Indemnité déplacement voiture: ", indemnite_km()$tarif_indemnite_voiture, "€ pour", indemnite_km()$km_voiture ," kilomètres \n",
+        "- Indemnité déplacement transports en commun: ",indemnite_km()$tarif_indemnite_transport, "€ \n",
         "- Charges patronales par mois:", charges_patronales(salaire_annuel_f1), "€\n",
-        "- Coût total par mois :", round(salaire_mensualise_f1, 2) + round((indemnite_f1*52)/12, 2) + charges_f1 + indemnite_km_f1()$tarif_total, "€\n\n",
+        "- Coût total par mois :", round(salaire_mensualise_f1, 2) + round((indemnite_f1*52)/12, 2) + charges_f1 + indemnite_km()$tarif_total_famille, "€\n\n",
         
         "Résultats pour la Famille 2 :\n",
-        "- Salaire brut horaire : ", salaire_brut_f2, "€\n",
-        "- Heures par semaine : ", round(heures_f2, 2), "h\n",
+        "- Salaire brut horaire : ", salaire_brut, "€\n",
+        "- Heures par semaine : ", heures_f2, "h\n",
         " -Montant annuel et mensuel CMG : ", ifelse(cmg_f2 > 0, paste(cmg_f2, "€ ;"), "Non applicable ;"), ifelse(cmg_f2 !=0 , paste(cmg_f2_mensuel, "€\n"), "\n"),
         "- Droit au crédit d'impôt : ", ifelse(credit_impot_f2 > 0, paste("OUI :", round(credit_impot_f2, 2), "€"), "NON"), "\n",
         "- Salaire annualisé brut (après déduction de la CMG si applicable): ", round(salaire_annualise_brut_apresCMG_f2, 2), "€\n",
         "- Indemnités repas : ", round((indemnite_f2*52)/12, 2), "€\n",
-        "- Indemnité déplacement vélo: ", indemnite_km_f2()$tarif_indemnite_velo, "€ pour", indemnite_km_f2()$km_velo ,"kilomètres\n",
-        "- Indemnité déplacement voiture: ", indemnite_km_f2()$tarif_indemnite_voiture, "€ pour", indemnite_km_f2()$km_voiture ," kilomètres \n",
-        "- Indemnité déplacement transports en commun: ",indemnite_km_f2()$tarif_indemnite_transport, "€ \n",
+        "- Indemnité déplacement vélo: ", indemnite_km()$tarif_indemnite_velo, "€ pour", indemnite_km()$km_velo ,"kilomètres\n",
+        "- Indemnité déplacement voiture: ", indemnite_km()$tarif_indemnite_voiture, "€ pour", indemnite_km()$km_voiture ," kilomètres \n",
+        "- Indemnité déplacement transports en commun: ",indemnite_km()$tarif_indemnite_transport, "€ \n",
         "- Charges patronales :", charges_patronales(salaire_annuel_f2), "€\n",
-        "- Coût total par mois :", round(salaire_mensualise_f2, 2) + round((indemnite_f2*52)/12, 2) + charges_f2 + indemnite_km_f2()$tarif_total , "€\n\n",
-        
+        "- Coût total par mois :", round(salaire_mensualise_f2, 2) + round((indemnite_f2*52)/12, 2) + charges_f2 + indemnite_km()$tarif_total_famille , "€\n\n",
+      
         "Résultats combinés :\n",
-        "- Heures totales par semaine : ", round(heures_totales, 2), "h\n",
+        "- Heures totales par semaine : ", heures_f1 + heures_f2 - heures_communes, "h\n",
         "- Salaire annualisé total net : ", round(salaire_net_annuel_mensualise, 2), "€\n",
-        "- Indemnités repas totales : ", round(indemnite_f1 + indemnite_f2, 2), "€\n"
+        "- Indemnités repas totales : ", round(indemnite_f1 + indemnite_f2, 2), "€\n",
+        "- Indemnités déplacement :", indemnite_km()$tarif_total_assistante
       )
     })
   })
+
   
+
+    
+    
   # Graphiques
   output$plot_repartition_heures <- renderPlotly({
     
     req(input$calcul_global)
     
-    heures_f1 <- calcul_heures_semaine("_f1")
-    heures_f2 <- calcul_heures_semaine("_f2")
+    heures_f1 <- calcul_heures_semaine("_f1", "_f2")$heures_f1 
+    heures_f2 <- calcul_heures_semaine("_f1", "_f2")$heures_f2
     data <- data.frame(
       Famille = c("Famille 1", "Famille 2"),
       Heures = c(heures_f1, heures_f2)
@@ -733,13 +721,14 @@ server <- function(input, output, session) {
     
     req(input$calcul_global)
     
-    heures_f1 <- calcul_heures_semaine("_f1")
-    heures_f2 <- calcul_heures_semaine("_f2")
-    salaire_brut_f1 <- as.numeric(input$salaire_brut_f1)
-    salaire_brut_f2 <- as.numeric(input$salaire_brut_f2)
+    heures_f1 <- calcul_heures_semaine("_f1", "_f2")$heures_f1
+    heures_f2 <- calcul_heures_semaine("_f1", "_f2")$heures_f2
+    heures_communes <- calcul_heures_semaine("_f1", "_f2")$heures_communes
     
-    revenu_f1 <- calcul_salaire_mensualise_partage(heures_f1, 0, salaire_brut_f1,0, 52)$salaire_f1
-    revenu_f2 <- calcul_salaire_mensualise_partage(0, heures_f2,0, salaire_brut_f2, 52)$salaire_f2
+    salaire_brut<- as.numeric(input$salaire_brut)
+
+    revenu_f1 <- calcul_salaire_mensualise_partage(heures_communes, heures_f1, heures_f2, salaire_brut, 52)$salaire_f1
+    revenu_f2 <- calcul_salaire_mensualise_partage(heures_communes, heures_f1, heures_f2, salaire_brut, 52)$salaire_f2
     
     data <- data.frame(
       Famille = c("Famille 1", "Famille 2"),
