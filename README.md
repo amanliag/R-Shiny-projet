@@ -1,5 +1,6 @@
 # Simulateur de coût de garde partagée
 
+
 ## Description du simulateur
 
 L'application Shiny simule les coûts liés à une garde partagée à domicile entre deux familles. Nous cherchons à calculer plusieurs parametres financiers pour que les familles sachent quels frais sont à engager mais aussi que l'assistante maternelle ait connaissance de l'argent qu'elle percevra : salaires nets, bruts, aides fiscales et aides de l'Etat, etc.
@@ -28,6 +29,13 @@ A venir quant au code:
 
 - Eviter les répétitions de code car répétition pour les deux familles
 - Mieux organiser le code en différents fichiers et mettre les fonctions aux bons endroits
+
+A VERIFIER : 
+
+Bug dans le code: voici l'erreur quand on modifie un horaire en cliquant sur les flèches Warning: Error in as.POSIXlt.character: character string is not in a standard unambiguous format
+
+Bug sur le graphique des heures travaillées: data must be a �[34m<data.frame>�[39m, or an object coercible by fortify(), or a valid �[34m<data.frame>�[39m-like object coercible by as.data.frame().
+
 
 ## Fonctionnalités mises en place
 
