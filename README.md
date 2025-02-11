@@ -15,20 +15,11 @@ ATTENTION: Les semaines de congés, les jours fériés et toutes les réglementa
 
 A venir quant aux fonctionnalités: 
 
-- Agencer les sorties textes en tableau 
-- Pouvoir télécharger les informations (format .csv)
-- Calculer correctement les heures complémentaires et les heures majorées
+- Calculer correctement les heures complémentaires et les heures majorées : mettre un message d'alerte et faire le bon calcul
 - Message d'alerte pour ne pas dépasser le taux horaire/semaine légal
-- Ne pas être obligé de fermer l'application pour remettre à 0 les entrées
 - Ajout de graphiques pour une meilleure visualisation
-- Actuellement nous considérons que chaque famille ne fait garder qu'un enfant.
-- Un résumé de la réglementation permettant aux personnes utilisant le simulateur de connaître les critères de calculs.
 - Comptabiliser correctement les semaines de vacances et les jours non travaillés exceptionnels dans les jours comptés.
 
-A venir quant au code: 
-
-- Eviter les répétitions de code car répétition pour les deux familles
-- Mieux organiser le code en différents fichiers et mettre les fonctions aux bons endroits
 
 A VERIFIER : 
 
