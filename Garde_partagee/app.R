@@ -196,7 +196,7 @@ ui <- dashboardPage(
               conditionalPanel(
                 condition = "output.resultats_combines != null",
                 fluidRow(
-                  column(6,
+                  column(12,
                          box(
                            title = "Répartition des heures travaillées",
                            status = "primary",
@@ -205,7 +205,7 @@ ui <- dashboardPage(
                            plotlyOutput("plot_repartition_heures")
                          )
                   ),
-                  column(6,
+                  column(12,
                          box(
                            title = "Revenus par famille",
                            status = "success",
@@ -598,7 +598,7 @@ server <- function(input, output, session) {
     
     # Total global
     heures_totales <- calcul_heures_semaine("_f1", "_f2")$heures_asssistante
-    salaire_net_annuel_mensualise <- repartition_salaire_net_mensualise(heures_f1, heures_f2, salaire_brut, semaines_travaillees = 52)$total_contribution_net
+    salaire_net_annuel_mensualise <- repartition_salaire_net_mensualise(heures_f1, heures_f2, salaire_brut, salaire_brut, semaines_travaillees = 52)$total_contribution_net
 
     
     #CMG Complément libre choix de garde
@@ -713,8 +713,6 @@ server <- function(input, output, session) {
       geom_bar(stat = "identity", show.legend = FALSE) +
       labs(title = "Répartition des heures travaillées", y = "Heures par semaine", x = "Famille") +
       theme_minimal()
-    
-    ggplotly(p)
   })
   
   output$plot_revenu_famille <- renderPlotly({
@@ -739,8 +737,6 @@ server <- function(input, output, session) {
       geom_bar(stat = "identity", show.legend = FALSE) +
       labs(title = "Tarif brut à payer par famille", y = "Revenus (€)", x = "Famille") +
       theme_minimal()
-    
-    ggplotly(p)
   })
   
   output$plot_charges <- renderPlot({
