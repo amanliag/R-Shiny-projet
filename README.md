@@ -18,19 +18,32 @@ L'interface contient 4 onglets principaux:  Simulateur, Etude de cas, Législati
 
 Le simulateur est l'endroit où il faut saisir les données des deux familles pour réaliser les calculs de coût. 
 Les inputs actuels sont:
-- le salaire brut horaire pour les 2 familles, \newline
-- les jours travaillés (case à cocher) puis les heures travaillées par journée pour chaque famille, les repas pris en charge par jour et la possibilité d'indiquer s'il y a des périodes de vacances.
+- le salaire brut horaire pour les 2 familles, 
+- les jours travaillés (case à cocher) puis les heures travaillées par journée pour chaque famille, 
+- les repas pris en charge par jour  pour chaque famille,
+- les modes de transports pris en charge et les frais que cela coûte, 
+- la possibilité d'indiquer 6 semaines de vacances.
 
-Les sorties actuelles sont les salaires nets et bruts (par heure et mensualisés), les coûts totaux pour les familles dont les salaires, les charges patronales, les indemnités des repas. 
-L'utilisateur doit ajouter manuellement le Complément de libre choix du modèle de garde (CMG) pour toute l'année. 
+Concernant l'aide financière: 
+L'utilisateur indique s'il a le droit au Complément de libre choix du mode de garde (CMG) et doit indiquer le montant en euros. 
+Le droit au crédit d'impôt est ensuite calculée automatiquement.
 
-Le simulateur calcule automatiquement si la famille a le droit au crédit d'impot.
+Les sorties actuelles sont les salaires nets et bruts (par heure et mensualisés, et prenant en compte les heures complémentaires et supplémentaires), les coûts totaux pour les familles dont les salaires, les charges patronales, les indemnités des repas, les indemnités de frais de déplacement mais aussi le montant annuel et mensuel du CMG et le droit au crédit d'impôt avec son montant si applicable.
+
+L'assitante maternelle a aussi connaissance de:
+ - Heures totales par semaine 
+ - Salaire annualisé total net
+ - Indemnités repas totales 
+ - Indemnités déplacement 
+ - Semaines de congés
+
 
 A cela s'ajoute deux graphiques simples à barres concernant les heures totales de chaque famille et le coût.
 
 Des messsages d'avertissement guident l'utilisateur concernant le remplissage des informations:
 - un message d'avertissement s'affiche si le salaire brut horaire renseigné est inférieur au seuil
 - un message d'avertissement s'affiche si l'amplitude horaire ou le nombre d'heures par jour dépasse 13h. Ce dernier reste jusqu'à ce que l'utilisateur ait correctement modifié les inputs.
+- un message d'avertissement s'affiche si une famille demande 7 jours ou consécutifs ou que le jour de repos n'est pas le même lorsque chaque famille demande à l'assistante maternelle de travailler 6 jours.
 
 ### Onglet Etude de cas
 
@@ -54,24 +67,18 @@ Cet onglet contient des informations quant aux aides que peut percevoir un paren
 - Crédit d'impôt 
 - Complément de libre choix du mode de garde 
 
+Différents liens sont à sa disposition, dont un exemple de contrat de travail. 
+
 ### Prérequis pour l'utilisation de l'application
 
 R et Rstudio sont évidemment essentiels, avec les packages suivant: shiny, shinydashboard, shinyWidgets, shinyTime, tidyr, ggplot2.
 
 ## A améliorer: 
 
-ATTENTION: Les semaines de congés, les jours fériés et toutes les réglementations ne sont pas encore pris en compte dans les calculs !
-
-A venir quant aux fonctionnalités: 
-
-- Calculer correctement les heures complémentaires et les heures majorées : mettre un message d'alerte et faire le bon calcul
-- Message d'alerte pour ne pas dépasser le taux horaire/semaine légal
-- Ajout de graphiques pour une meilleure visualisation
-- Comptabiliser correctement les semaines de vacances et les jours non travaillés exceptionnels dans les jours comptés.
+Malheureusement, nous n'avons pas eu le temps de considérer: 
+- la question des jours fériés 
+- la vérification des bornes temporelles quant aux vacances 
+- un message d'alerte pour indiquer aux utilisateurs qu'il y aura des heures complémentaires ou supplémentaires 
+- Ajout de graphiques pour une meilleure visualisation 
 
 
-A VERIFIER : 
-
-Bug dans le code: voici l'erreur quand on modifie un horaire en cliquant sur les flèches Warning: Error in as.POSIXlt.character: character string is not in a standard unambiguous format
-
-Bug sur le graphique des heures travaillées: data must be a �[34m<data.frame>�[39m, or an object coercible by fortify(), or a valid �[34m<data.frame>�[39m-like object coercible by as.data.frame().
