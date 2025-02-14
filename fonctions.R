@@ -57,8 +57,8 @@ calcul_salaire_mensualise_partage <- function(heures_communes, heures_par_semain
   salaire_communes <- round(salaire_communes, 2)
   salaire_part_f1 <- round(salaire_part_f1, 2)
   salaire_part_f2 <- round(salaire_part_f2, 2)
-  salaire_f1 <- round(salaire_f1, 2) + salaire_part_f1
-  salaire_f2 <- round(salaire_f2, 2) + salaire_part_f2
+  salaire_f1 <- round(salaire_f1, 2)
+  salaire_f2 <- round(salaire_f2, 2) 
   salaire_total <- round(salaire_total, 2)
   
   return(list(
