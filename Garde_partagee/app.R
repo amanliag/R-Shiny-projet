@@ -717,7 +717,7 @@ server <- function(input, output, session) {
         "- Salaire annualisé total net : ", round(salaire_net_annuel_mensualise, 2), "€\n",
         "- Indemnités repas totales : ", round(indemnite_f1 + indemnite_f2, 2), "€\n",
         "- Indemnités déplacement : ", indemnite_km()$tarif_total_assistante, "€\n",
-        "- Semaines semaines de congéss :\n",
+        "- Semaines de congés :\n",
         paste0(
           "  - ", format(input$semaine1_debut, "%d/%m/%Y"), " au ", format(input$semaine1_fin, "%d/%m/%Y"), "\n",
           "  - ", format(input$semaine2_debut, "%d/%m/%Y"), " au ", format(input$semaine2_fin, "%d/%m/%Y"), "\n",
