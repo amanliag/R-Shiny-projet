@@ -6,8 +6,29 @@ calcul_net <- function(salaire_brut) {
 
 # --- Salaire brut annualisé 
 calcul_salaire_mensualise_partage <- function(heures_par_semaine_f1, heures_par_semaine_f2, tarif_horaire_f1, tarif_horaire_f2, semaines_travaillees = 52) {
-  salaire_f1 <- (semaines_travaillees * heures_par_semaine_f1 * tarif_horaire_f1) / 12
-  salaire_f2 <- (semaines_travaillees * heures_par_semaine_f2 * tarif_horaire_f2) / 12
+  heures_comp_f1 <- 0
+  heures_sup_f1 <- 0
+  heures_comp_f2 <- 0
+  heures_sup_f2 <- 0
+  
+  if (heures_par_semaine_f1 > 32){
+    heures_comp_f1 <- heures_par_semaine_f1-32
+    if (heures_par_semaine_f1 > 45){
+      heures_sup_f1 <- heures_par_semaine_f1-45
+    }
+  }
+  if (heures_par_semaine_f2 > 32){
+    heures_comp_f2 <- heures_par_semaine_f2-32
+    if (heures_par_semaine_f2 > 45){
+      heures_sup_f2 <- heures_par_semaine_f2-45
+    }
+  }
+  heures_par_semaine_f1 <- heures_par_semaine_f1 - heures_sup_f1 - heures_comp_f1
+  heures_par_semaine_f2 <- heures_par_semaine_f2 - heures_sup_f2 - heures_comp_f2
+  
+    
+  salaire_f1 <- (semaines_travaillees * (heures_par_semaine_f1 * tarif_horaire_f1 + heures_comp_f1 * (tarif_horaire_f1 + 4.10) + heures_sup_f1 * (tarif_horaire_f1 + 4.48))) / 12
+  salaire_f2 <- (semaines_travaillees * (heures_par_semaine_f2 * tarif_horaire_f2 + heures_comp_f2 * (tarif_horaire_f2 + 4.10) + heures_sup_f2 * (tarif_horaire_f2 + 4.48))) / 12
   salaire_total <- salaire_f1 + salaire_f2
     
   salaire_f1 <- round(salaire_f1, 2)
@@ -76,25 +97,7 @@ charges_patronales <- function(salaire_brut) {
 
 # --- Nombre total d'heures ---
 
-calcul_total_heure <- function(liste){
-  bilan <- list()
-  diff = 0
-  for (jour in names(liste)){ # On se balade jour par jour
-    for (i in (1:length(liste[[jour]]))){ # On regarde les 4 cas, matin début, matin fin etc.
-      if (liste[[jour]][[i]]!=""){ # Si une valeur a été rentrée...
-        liste[[jour]][[i]] <- conversion_heure_to_entier(liste[[jour]][[i]]) # ...alors on converti l'heure en entier (minutes)
-      }
-    }
-    if(liste[[jour]][[1]] != "" & liste[[jour]][[2]] != ""){ # Si matin début et matin fin sont rentrés par l'utilisateur
-      diff = diff + (liste[[jour]][[2]] - liste[[jour]][[1]]) # alors on calcule la différence
-    }
-    if(liste[[jour]][[3]] != "" & liste[[jour]][[4]] != ""){ # Idem pour après-midi
-      diff = diff + (liste[[jour]][[4]] - liste[[jour]][[3]])
-    }
-      
-  }
-  return(diff)
-}
+
 
 ### ----- TRAITEMENT CONVERSIONS HEURE ----- #####
 
@@ -119,3 +122,4 @@ conversion_entier_to_heure <- function(entier){
 
 #### ------ VERIFICATION DES 9H max de travail par jour ------ ####
 #A FAIRE
+
