@@ -24,6 +24,7 @@ ui <- dashboardPage(
     sidebar
   ),
   dashboardBody(
+    useShinyjs(),
     useShinyFeedback(),
     tabItems(
       ######## ONGLET SIMULATEUR ########
@@ -182,11 +183,38 @@ ui <- dashboardPage(
                              value = NULL,
                              min = 0
                            )
+                         ),
+                         h4("Sélection des semaines de congés :"),
+                         
+                         fluidRow(
+                           column(6, dateInput("semaine1_debut", "Début Semaine 1 :", value = NA, format = "dd-mm-yyyy")),
+                           column(6, dateInput("semaine1_fin", "Fin Semaine 1 :", value = NA, format = "dd-mm-yyyy"))
+                         ),
+                         fluidRow(
+                           column(6, dateInput("semaine2_debut", "Début Semaine 2 :", value = NA, format = "dd-mm-yyyy")),
+                           column(6, dateInput("semaine2_fin", "Fin Semaine 2 :", value = NA, format = "dd-mm-yyyy"))
+                         ),
+                         fluidRow(
+                           column(6, dateInput("semaine3_debut", "Début Semaine 3 :", value = NA, format = "dd-mm-yyyy")),
+                           column(6, dateInput("semaine3_fin", "Fin Semaine 3 :", value = NA, format = "dd-mm-yyyy"))
+                         ),
+                         fluidRow(
+                           column(6, dateInput("semaine4_debut", "Début Semaine 4 :", value = NA, format = "dd-mm-yyyy")),
+                           column(6, dateInput("semaine4_fin", "Fin Semaine 4 :", value = NA, format = "dd-mm-yyyy"))
+                         ),
+                         fluidRow(
+                           column(6, dateInput("semaine5_debut", "Début Semaine 5 :", value = NA, format = "dd-mm-yyyy")),
+                           column(6, dateInput("semaine5_fin", "Fin Semaine 5 :", value = NA, format = "dd-mm-yyyy"))
+                         ),
+                         fluidRow(
+                           column(6, dateInput("semaine6_debut", "Début Semaine 6 :", value = NA, format = "dd-mm-yyyy")),
+                           column(6, dateInput("semaine6_fin", "Fin Semaine 6 :", value = NA, format = "dd-mm-yyyy"))
                          )
                        )
                       )
                 )
               ),
+            
               fluidRow(
                 column(12,
                        actionButton("calcul_global", "Calculer pour les deux familles"),
@@ -598,7 +626,7 @@ server <- function(input, output, session) {
     
     # Total global
     heures_totales <- calcul_heures_semaine("_f1", "_f2")$heures_asssistante
-    salaire_net_annuel_mensualise <- repartition_salaire_net_mensualise(heures_f1, heures_f2, salaire_brut, salaire_brut, semaines_travaillees = 52)$total_contribution_net
+    salaire_net_annuel_mensualise <- repartition_salaire_net_mensualise(heures_communes, heures_f1, heures_f2, salaire_brut, semaines_travaillees = 52)$total_contribution_net
 
     
     #CMG Complément libre choix de garde
@@ -688,7 +716,17 @@ server <- function(input, output, session) {
         "- Heures totales par semaine : ", heures_f1 + heures_f2 - heures_communes, "h\n",
         "- Salaire annualisé total net : ", round(salaire_net_annuel_mensualise, 2), "€\n",
         "- Indemnités repas totales : ", round(indemnite_f1 + indemnite_f2, 2), "€\n",
-        "- Indemnités déplacement :", indemnite_km()$tarif_total_assistante
+        "- Indemnités déplacement : ", indemnite_km()$tarif_total_assistante, "€\n",
+        "- Semaines semaines de congéss :\n",
+        paste0(
+          "  - ", format(input$semaine1_debut, "%d/%m/%Y"), " au ", format(input$semaine1_fin, "%d/%m/%Y"), "\n",
+          "  - ", format(input$semaine2_debut, "%d/%m/%Y"), " au ", format(input$semaine2_fin, "%d/%m/%Y"), "\n",
+          "  - ", format(input$semaine3_debut, "%d/%m/%Y"), " au ", format(input$semaine3_fin, "%d/%m/%Y"), "\n",
+          "  - ", format(input$semaine4_debut, "%d/%m/%Y"), " au ", format(input$semaine4_fin, "%d/%m/%Y"), "\n",
+          "  - ", format(input$semaine5_debut, "%d/%m/%Y"), " au ", format(input$semaine5_fin, "%d/%m/%Y"), "\n",
+          "  - ", format(input$semaine6_debut, "%d/%m/%Y"), " au ", format(input$semaine6_fin, "%d/%m/%Y"), "\n"
+        )
+        
       )
     })
   })
@@ -789,8 +827,8 @@ server <- function(input, output, session) {
           "Temps de repos obligatoire"
         ),
         Valeur = c(
-          "+25% à partir de la 40ᵉ heure", 
-          "9 heures", 
+          "+4.10€ à partir de la 32 à 45ème heure et +4.48€ dès la 45ème heure", 
+          "13 heures", 
           "48 heures", 
           "45 heures", 
           "11 heures après une journée de travail"
@@ -800,6 +838,7 @@ server <- function(input, output, session) {
       rownames = FALSE
     )
   })
+  
 
 }
 
