@@ -2,6 +2,7 @@
 
 required_packages <- c(
   "shiny", 
+  "shinyjs",
   "shinydashboard", 
   "tidyr", 
   "ggplot2", 
